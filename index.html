@@ -431,10 +431,11 @@
             margin-bottom: 2rem;
             text-align: center;
             padding: 2rem;
-            background: var(--accent-primary);
-            color: var(--text-light);
+            background: var(--bg-secondary); /* 白から薄いグレーに変更 */
+            color: var(--text-primary); /* 白から黒（またはダークモードでは白）に変更 */
             border-radius: var(--border-radius-lg);
             letter-spacing: -0.01em;
+            border: 1px solid var(--border-light); /* 枠線を追加 */
         }
 
         .choices {
@@ -529,8 +530,8 @@
             border-radius: var(--border-radius);
             margin-bottom: 2rem;
             text-align: center;
-            font-size: 1.2rem;
-            font-weight: 300;
+            font-size: 2.2rem; /* さらに大きく */
+            font-weight: 400; /* 少し太くして見やすく */
             letter-spacing: 0.05em;
         }
 
