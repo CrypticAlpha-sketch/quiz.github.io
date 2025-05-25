@@ -827,851 +827,604 @@ h1 {
     <script>
 // ゲーム状態
 let gameState = {
-   mode: 'local', // local, online
-   players: [],
-   currentQuestion: 0,
-   questions: [],
-   timer: null,
-   timeLeft: 15,
-   scores: {},
-   selectedCategories: [],
-   soundEnabled: true,
-   currentAnswers: [],
-   onlineState: {
-       ws: null,
-       roomId: null,
-       playerId: null,
-       isHost: false,
-       connected: false
-   }
+    mode: 'local', // local, online
+    players: [],
+    currentQuestion: 0,
+    questions: [],
+    timer: null,
+    timeLeft: 15,
+    scores: {},
+    selectedCategories: [],
+    soundEnabled: true,
+    currentAnswers: [],
+    onlineState: {
+        ws: null,
+        roomId: null,
+        playerId: null,
+        isHost: false,
+        connected: false
+    }
 };
 
-// 音声管理
-const sounds = {
-    correct: new Audio('data:audio/wav;base64,UklGRi4CAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQoCAAC5wMTBxL6/v7fAvsHAv7+/v7+/v7+/v7+/v8C7wb3Bvb6/vL+8v73AvMC+vb+9vr2/vL69wLy/vL+9wL6/vr6/wL/AvsG/wMDAwMDBwcDAwcDBwcHCwcLBw8LDw8PDw8TExMTFxMXFxcXGxsbGx8bHx8fHyMfIyMnIycnJycnKysrKy8vLy8zMzMzNzM3Nzs3Ozs7Ozs/O0M/Q0M/Q0NDR0dHR0tHR0tLS0tLS09PT09TU1NTU1dTU1dXV1dYAAAC5wMTBxL6/v7fAvsHAv7+/v7+/v7+/v7+/v8C7wb3Bvb6/vL+8v73AvMC+vb+9vr2/vL69wLy/vL+9wL6/vr6/wL/AvsG/wMDAwMDBwcDAwcDBwcHCwcLBw8LDw8PDw8TExMTFxMXFxcXGxsbGx8bHx8fHyMfIyMnIycnJycnKysrKy8vLy8zMzMzNzM3Nzs3Ozs7Ozs/O0M/Q0M/Q0NDR0dHR0tHR0tLS0tLS09PT09TU1NTU1dTU1dXV1dY='),
-    incorrect: new Audio('data:audio/wav;base64,UklGRhwCAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YfgBAADPz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Pz8/Qz9DP0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ0'),
-    start: new Audio('data:audio/wav;base64,UklGRhwDAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YfgCAABhYWBhYGFgYWBhYGFgYWBgYGBhYGFgYWBhYGFgYWBhYGFgYWBhYGFgYWBhYGFgYWBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBg')
-};        
-        
+// 音声管理（省略）
+// const sounds = { ... };
+
 // デフォルト問題
 const defaultQuestions = [
-   {
-       question: "日本の首都はどこですか？",
-       choices: ["大阪", "東京", "京都"],
-       correct: 1,
-       category: "general"
-   },
-   {
-       question: "富士山の高さは？",
-       choices: ["3,776m", "3,676m", "3,876m"],
-       correct: 0,
-       category: "geography"
-   },
-   {
-       question: "鎌倉幕府を開いたのは誰？",
-       choices: ["源頼朝", "足利尊氏", "徳川家康"],
-       correct: 0,
-       category: "history"
-   },
-   {
-       question: "水の化学式は？",
-       choices: ["CO2", "H2O", "O2"],
-       correct: 1,
-       category: "science"
-   },
-   {
-       question: "地球で最も大きな大陸は？",
-       choices: ["アフリカ大陸", "アジア大陸", "北アメリカ大陸"],
-       correct: 1,
-       category: "geography"
-   },
-   {
-       question: "光の速度はおよそ？",
-       choices: ["秒速30万km", "秒速3万km", "秒速300万km"],
-       correct: 0,
-       category: "science"
-   },
-   {
-       question: "東京オリンピック2020の開催年は？",
-       choices: ["2020年", "2021年", "2022年"],
-       correct: 1,
-       category: "sports"
-   },
-   {
-       question: "源氏物語の作者は？",
-       choices: ["清少納言", "紫式部", "sei shonagon"],
-       correct: 1,
-       category: "history"
-   },
-   {
-       question: "ジブリ作品「千と千尋の神隠し」の監督は？",
-       choices: ["宮崎駿", "高畑勲", "細田守"],
-       correct: 0,
-       category: "entertainment"
-   },
-   {
-       question: "DNA の正式名称は？",
-       choices: ["デオキシリボ核酸", "リボ核酸", "アミノ酸"],
-       correct: 0,
-       category: "science"
-   },
-   {
-       question: "日本で最も長い川は？",
-       choices: ["利根川", "信濃川", "石狩川"],
-       correct: 1,
-       category: "geography"
-   },
-   {
-       question: "太陽系で最も大きな惑星は？",
-       choices: ["土星", "木星", "海王星"],
-       correct: 1,
-       category: "science"
-   },
-   {
-       question: "1964年の東京オリンピックの開催月は？",
-       choices: ["9月", "10月", "11月"],
-       correct: 1,
-       category: "sports"
-   },
-   {
-       question: "世界で最も高い山は？",
-       choices: ["K2", "エベレスト", "マナスル"],
-       correct: 1,
-       category: "geography"
-   },
-   {
-       question: "漢字で「山」の部首は？",
-       choices: ["やまへん", "やまかんむり", "やま"],
-       correct: 2,
-       category: "general"
-   }
+    {
+        question: "日本の首都はどこですか？",
+        choices: ["大阪", "東京", "京都"],
+        correct: 1,
+        category: "general"
+    },
+    {
+        question: "富士山の高さは？",
+        choices: ["3,776m", "3,676m", "3,876m"],
+        correct: 0,
+        category: "geography"
+    },
+    {
+        question: "鎌倉幕府を開いたのは誰？",
+        choices: ["源頼朝", "足利尊氏", "徳川家康"],
+        correct: 0,
+        category: "history"
+    },
+    {
+        question: "水の化学式は？",
+        choices: ["CO2", "H2O", "O2"],
+        correct: 1,
+        category: "science"
+    },
+    {
+        question: "地球で最も大きな大陸は？",
+        choices: ["アフリカ大陸", "アジア大陸", "北アメリカ大陸"],
+        correct: 1,
+        category: "geography"
+    },
+    {
+        question: "光の速度はおよそ？",
+        choices: ["秒速30万km", "秒速3万km", "秒速300万km"],
+        correct: 0,
+        category: "science"
+    },
+    {
+        question: "東京オリンピック2020の開催年は？",
+        choices: ["2020年", "2021年", "2022年"],
+        correct: 1,
+        category: "sports"
+    },
+    {
+        question: "源氏物語の作者は？",
+        choices: ["清少納言", "紫式部", "和泉式部"],
+        correct: 1,
+        category: "history"
+    },
+    {
+        question: "ジブリ作品「千と千尋の神隠し」の監督は？",
+        choices: ["宮崎駿", "高畑勲", "細田守"],
+        correct: 0,
+        category: "entertainment"
+    },
+    {
+        question: "DNA の正式名称は？",
+        choices: ["デオキシリボ核酸", "リボ核酸", "アミノ酸"],
+        correct: 0,
+        category: "science"
+    },
+    {
+        question: "日本で最も長い川は？",
+        choices: ["利根川", "信濃川", "石狩川"],
+        correct: 1,
+        category: "geography"
+    },
+    {
+        question: "太陽系で最も大きな惑星は？",
+        choices: ["土星", "木星", "海王星"],
+        correct: 1,
+        category: "science"
+    },
+    {
+        question: "1964年の東京オリンピックの開催月は？",
+        choices: ["9月", "10月", "11月"],
+        correct: 1,
+        category: "sports"
+    },
+    {
+        question: "世界で最も高い山は？",
+        choices: ["K2", "エベレスト", "マナスル"],
+        correct: 1,
+        category: "geography"
+    },
+    {
+        question: "漢字で「山」の部首は？",
+        choices: ["やまへん", "やまかんむり", "やま"],
+        correct: 2,
+        category: "general"
+    }
 ];
 
 // カテゴリ管理
 const categories = {
-   general: { name: '一般常識', color: '#007bff' },
-   history: { name: '歴史', color: '#dc3545' },
-   science: { name: '科学', color: '#28a745' },
-   geography: { name: '地理', color: '#ffc107' },
-   sports: { name: 'スポーツ', color: '#fd7e14' },
-   entertainment: { name: 'エンタメ', color: '#6f42c1' }
+    general: { name: '一般常識', color: '#007bff' },
+    history: { name: '歴史', color: '#dc3545' },
+    science: { name: '科学', color: '#28a745' },
+    geography: { name: '地理', color: '#ffc107' },
+    sports: { name: 'スポーツ', color: '#fd7e14' },
+    entertainment: { name: 'エンタメ', color: '#6f42c1' },
+    custom: { name: 'カスタム', color: '#6c757d' }
 };
+
+// カスタム問題管理
+let customQuestions = [];
 
 // 音声管理
 function playSound(type) {
-   if (!gameState.soundEnabled) return;
-   
-   try {
-       if (sounds[type]) {
-           sounds[type].currentTime = 0;
-           sounds[type].play().catch(e => console.log('音声再生エラー:', e));
-       }
-   } catch (error) {
-       console.log('音声エラー:', error);
-   }
+    if (!gameState.soundEnabled) return;
+    
+    // サウンド再生の実装（必要に応じて）
+    console.log(`Playing sound: ${type}`);
 }
 
-// 初期化
-function init() {
-   initEventListeners();
-   initWebSocket();
-   showScreen('mainMenu');
-   updateConnectionStatus(false);
+function toggleSound() {
+    gameState.soundEnabled = !gameState.soundEnabled;
+    const soundIcon = document.getElementById('soundIcon');
+    if (soundIcon) {
+        soundIcon.textContent = gameState.soundEnabled ? '🔊' : '🔇';
+    }
 }
 
-// イベントリスナー設定
-function initEventListeners() {
-   // 音声設定
-   const soundToggle = document.getElementById('soundToggle');
-   if (soundToggle) {
-       soundToggle.addEventListener('change', (e) => {
-           gameState.soundEnabled = e.target.checked;
-       });
-   }
-
-   // プレイヤー追加
-   const addPlayerBtn = document.getElementById('addPlayerBtn');
-   if (addPlayerBtn) {
-       addPlayerBtn.addEventListener('click', addPlayer);
-   }
-
-   // Enter キーでプレイヤー追加
-   const playerNameInput = document.getElementById('playerNameInput');
-   if (playerNameInput) {
-       playerNameInput.addEventListener('keypress', (e) => {
-           if (e.key === 'Enter') {
-               addPlayer();
-           }
-       });
-   }
-}
-
-// 画面切り替え
+// 画面管理
 function showScreen(screenId) {
-   if (screenId !== 'quizScreen') {
-       stopTimer();
-   }
-   
-   const screens = document.querySelectorAll('.screen');
-   screens.forEach(screen => screen.classList.remove('active'));
-   
-   const targetScreen = document.getElementById(screenId);
-   if (targetScreen) {
-       targetScreen.classList.add('active');
-   }
-   
-   document.body.style.opacity = '0';
-   setTimeout(() => {
-       document.body.style.opacity = '1';
-   }, 100);
+    if (screenId !== 'quizScreen') {
+        stopTimer();
+    }
+    
+    const screens = document.querySelectorAll('.screen');
+    screens.forEach(screen => screen.classList.remove('active'));
+    
+    const targetScreen = document.getElementById(screenId);
+    if (targetScreen) {
+        targetScreen.classList.add('active');
+    }
 }
 
-// ローカル対戦設定
-function showLocalGameSetup() {
-   showScreen('localGameSetup');
-   updateCategoryCheckboxes();
+function showHome() {
+    gameState.players = [];
+    gameState.scores = {};
+    gameState.currentQuestion = 0;
+    gameState.selectedCategories = [];
+    stopTimer();
+    showScreen('homeScreen');
 }
 
-// オンライン対戦メニュー
+// メインメニュー機能
+function startLocalGame() {
+    showScreen('playerScreen');
+}
+
 function showOnlineMenu() {
-   showScreen('onlineMenuScreen');
+    showScreen('onlineMenuScreen');
 }
 
-// メインメニューに戻る
-function backToMainMenu() {
-   gameState.players = [];
-   gameState.scores = {};
-   gameState.currentQuestion = 0;
-   gameState.selectedCategories = [];
-   stopTimer();
-   showScreen('mainMenu');
+function showQuestionCreator() {
+    showScreen('questionCreatorScreen');
+    updateQuestionList();
 }
 
-// プレイヤー追加
+// プレイヤー管理
 function addPlayer() {
-   const input = document.getElementById('playerNameInput');
-   const playerName = input.value.trim();
-   
-   if (!playerName) {
-       alert('プレイヤー名を入力してください');
-       return;
-   }
-   
-   if (gameState.players.some(player => player.name === playerName)) {
-       alert('同じ名前のプレイヤーがすでに存在します');
-       return;
-   }
-   
-   if (gameState.players.length >= 6) {
-       alert('プレイヤーは最大6人までです');
-       return;
-   }
-   
-   const player = {
-       id: Date.now(),
-       name: playerName
-   };
-   
-   gameState.players.push(player);
-   gameState.scores[player.id] = 0;
-   
-   input.value = '';
-   updatePlayerList();
-   
-   playSound('correct');
+    const input = document.getElementById('playerName');
+    const playerName = input.value.trim();
+    
+    if (!playerName) {
+        alert('プレイヤー名を入力してください');
+        return;
+    }
+    
+    if (gameState.players.some(player => player.name === playerName)) {
+        alert('同じ名前のプレイヤーがすでに存在します');
+        return;
+    }
+    
+    if (gameState.players.length >= 6) {
+        alert('プレイヤーは最大6人までです');
+        return;
+    }
+    
+    const player = {
+        id: Date.now(),
+        name: playerName
+    };
+    
+    gameState.players.push(player);
+    gameState.scores[player.id] = 0;
+    
+    input.value = '';
+    updatePlayerList();
+    
+    const startBtn = document.getElementById('startBtn');
+    if (gameState.players.length >= 2 && startBtn) {
+        startBtn.style.display = 'block';
+    }
+    
+    playSound('correct');
 }
 
-// プレイヤーリスト更新
 function updatePlayerList() {
-   const playerList = document.getElementById('playerList');
-   if (!playerList) return;
-   
-   playerList.innerHTML = gameState.players.map((player, index) => `
-       <div class="player-item">
-           <span>${player.name}</span>
-           <button class="btn-remove" onclick="removePlayer(${player.id})">削除</button>
-       </div>
-   `).join('');
+    const playerList = document.getElementById('playerList');
+    if (!playerList) return;
+    
+    playerList.innerHTML = gameState.players.map(player => `
+        <div class="player-item">
+            <span>${player.name}</span>
+            <button class="btn btn-danger" onclick="removePlayer(${player.id})">削除</button>
+        </div>
+    `).join('');
 }
 
-// プレイヤー削除
 function removePlayer(playerId) {
-   gameState.players = gameState.players.filter(player => player.id !== playerId);
-   delete gameState.scores[playerId];
-   updatePlayerList();
+    gameState.players = gameState.players.filter(player => player.id !== playerId);
+    delete gameState.scores[playerId];
+    updatePlayerList();
+    
+    const startBtn = document.getElementById('startBtn');
+    if (gameState.players.length < 2 && startBtn) {
+        startBtn.style.display = 'none';
+    }
 }
 
-// カテゴリチェックボックス更新
-function updateCategoryCheckboxes() {
-   const categoryContainer = document.getElementById('categorySelection');
-   if (!categoryContainer) return;
-   
-   categoryContainer.innerHTML = Object.entries(categories).map(([key, category]) => `
-       <label class="category-checkbox">
-           <input type="checkbox" value="${key}" onchange="toggleCategory('${key}')">
-           <span style="color: ${category.color}">${category.name}</span>
-       </label>
-   `).join('');
+// カテゴリ選択
+function showCategorySelection() {
+    if (gameState.players.length < 2) {
+        alert('最低2人のプレイヤーが必要です');
+        return;
+    }
+    showScreen('categoryScreen');
 }
 
-// カテゴリ選択切り替え
+function showPlayerRegistration() {
+    showScreen('playerScreen');
+}
+
 function toggleCategory(categoryKey) {
-   const index = gameState.selectedCategories.indexOf(categoryKey);
-   if (index === -1) {
-       gameState.selectedCategories.push(categoryKey);
-   } else {
-       gameState.selectedCategories.splice(index, 1);
-   }
+    const categoryItem = document.querySelector(`[data-category="${categoryKey}"]`);
+    if (!categoryItem) return;
+    
+    const index = gameState.selectedCategories.indexOf(categoryKey);
+    if (index === -1) {
+        gameState.selectedCategories.push(categoryKey);
+        categoryItem.classList.add('selected');
+    } else {
+        gameState.selectedCategories.splice(index, 1);
+        categoryItem.classList.remove('selected');
+    }
 }
 
-// ローカルクイズ開始
-function startLocalQuiz() {
-   if (gameState.players.length < 2) {
-       alert('最低2人のプレイヤーが必要です');
-       return;
-   }
-   
-   let questions = [...defaultQuestions];
-   
-   if (gameState.selectedCategories.length > 0) {
-       questions = questions.filter(q => gameState.selectedCategories.includes(q.category));
-   }
-   
-   if (questions.length < 6) {
-       alert('選択したカテゴリの問題が少なすぎます');
-       return;
-   }
-   
-   gameState.questions = shuffleArray(questions).slice(0, 6);
-   gameState.currentQuestion = 0;
-   gameState.mode = 'local';
-   
-   gameState.players.forEach(player => {
-       gameState.scores[player.id] = 0;
-   });
-   
-   playSound('start');
-   showQuestion();
+function startGameWithCategories() {
+    if (gameState.selectedCategories.length === 0) {
+        alert('最低1つのカテゴリを選択してください');
+        return;
+    }
+    
+    let questions = [...defaultQuestions, ...customQuestions];
+    
+    questions = questions.filter(q => gameState.selectedCategories.includes(q.category));
+    
+    if (questions.length < 6) {
+        alert('選択したカテゴリの問題が少なすぎます（最低6問必要）');
+        return;
+    }
+    
+    gameState.questions = shuffleArray(questions).slice(0, 6);
+    gameState.currentQuestion = 0;
+    gameState.mode = 'local';
+    
+    gameState.players.forEach(player => {
+        gameState.scores[player.id] = 0;
+    });
+    
+    playSound('start');
+    showQuestion();
 }
 
 // 配列シャッフル
 function shuffleArray(array) {
-   const newArray = [...array];
-   for (let i = newArray.length - 1; i > 0; i--) {
-       const j = Math.floor(Math.random() * (i + 1));
-       [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
-   }
-   return newArray;
+    const newArray = [...array];
+    for (let i = newArray.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+    }
+    return newArray;
 }
 
-// 問題表示
+// 問題表示・管理
 function showQuestion() {
-   stopTimer();
-   
-   if (gameState.currentQuestion >= gameState.questions.length) {
-       showResults();
-       return;
-   }
-   
-   const question = gameState.questions[gameState.currentQuestion];
-   gameState.currentAnswers = [];
-   
-   showScreen('quizScreen');
-   
-   document.getElementById('questionText').textContent = question.question;
-   document.getElementById('questionNumber').textContent = `問題 ${gameState.currentQuestion + 1} / ${gameState.questions.length}`;
-   
-   const choicesDiv = document.getElementById('choices');
-   choicesDiv.innerHTML = question.choices.map((choice, index) => `
-       <button class="choice" onclick="selectChoice(${index})">${choice}</button>
-   `).join('');
-   
-   document.getElementById('answerList').innerHTML = '';
-   
-   setTimeout(() => {
-       startTimer();
-   }, 100);
+    stopTimer();
+    
+    if (gameState.currentQuestion >= gameState.questions.length) {
+        showResults();
+        return;
+    }
+    
+    const question = gameState.questions[gameState.currentQuestion];
+    gameState.currentAnswers = [];
+    
+    showScreen('quizScreen');
+    
+    document.getElementById('questionText').textContent = question.question;
+    document.getElementById('questionNumber').textContent = `第${gameState.currentQuestion + 1}問 / ${gameState.questions.length}問`;
+    
+    const choicesDiv = document.getElementById('choices');
+    choicesDiv.innerHTML = question.choices.map((choice, index) => `
+        <div class="choice" onclick="selectChoice(${index})">${choice}</div>
+    `).join('');
+    
+    document.getElementById('answerList').innerHTML = '';
+    
+    setTimeout(() => {
+        startTimer();
+    }, 100);
 }
 
-// タイマー開始
+// タイマー管理
 function startTimer() {
-   if (gameState.timer) {
-       clearInterval(gameState.timer);
-       gameState.timer = null;
-   }
-   
-   const timerElement = document.getElementById('timer');
-   if (!timerElement) return;
-   
-   gameState.timeLeft = 15;
-   updateTimerDisplay();
-   
-   gameState.timer = setInterval(() => {
-       gameState.timeLeft--;
-       updateTimerDisplay();
-       
-       if (gameState.timeLeft <= 0) {
-           clearInterval(gameState.timer);
-           gameState.timer = null;
-           handleTimeUp();
-       }
-   }, 1000);
+    if (gameState.timer) {
+        clearInterval(gameState.timer);
+        gameState.timer = null;
+    }
+    
+    const timerElement = document.getElementById('timer');
+    if (!timerElement) return;
+    
+    gameState.timeLeft = 15;
+    updateTimerDisplay();
+    
+    gameState.timer = setInterval(() => {
+        gameState.timeLeft--;
+        updateTimerDisplay();
+        
+        if (gameState.timeLeft <= 0) {
+            clearInterval(gameState.timer);
+            gameState.timer = null;
+            handleTimeUp();
+        }
+    }, 1000);
 }
 
-// タイマー表示更新
 function updateTimerDisplay() {
-   const timerElement = document.getElementById('timer');
-   if (timerElement) {
-       timerElement.textContent = `残り時間: ${Math.max(0, gameState.timeLeft)}秒`;
-       
-       if (gameState.timeLeft <= 5) {
-           timerElement.style.color = '#dc3545';
-       } else if (gameState.timeLeft <= 10) {
-           timerElement.style.color = '#ffc107';
-       } else {
-           timerElement.style.color = '#28a745';
-       }
-   }
+    const timerElement = document.getElementById('timer');
+    if (timerElement) {
+        timerElement.textContent = gameState.timeLeft;
+    }
 }
 
-// 時間切れ処理
 function handleTimeUp() {
-   if (gameState.mode === 'online') {
-       return;
-   }
-   
-   const choices = document.querySelectorAll('.choice');
-   choices.forEach(choice => choice.disabled = true);
-   
-   setTimeout(() => {
-       nextQuestion();
-   }, 2000);
+    if (gameState.mode === 'online') {
+        return;
+    }
+    
+    const choices = document.querySelectorAll('.choice');
+    choices.forEach(choice => {
+        choice.style.pointerEvents = 'none';
+        choice.classList.add('disabled');
+    });
+    
+    const question = gameState.questions[gameState.currentQuestion];
+    choices[question.correct].classList.add('correct');
+    
+    setTimeout(() => {
+        nextQuestion();
+    }, 2000);
 }
 
-// タイマー停止
 function stopTimer() {
-   if (gameState.timer) {
-       clearInterval(gameState.timer);
-       gameState.timer = null;
-   }
+    if (gameState.timer) {
+        clearInterval(gameState.timer);
+        gameState.timer = null;
+    }
 }
 
-// 選択肢選択
+// 回答処理
 function selectChoice(index) {
-   stopTimer();
-   
-   const choices = document.querySelectorAll('.choice');
-   choices.forEach(choice => choice.disabled = true);
-   choices[index].classList.add('selected');
-   
-   const question = gameState.questions[gameState.currentQuestion];
-   const isCorrect = index === question.correct;
-   
-   const answerData = {
-       player: 'ローカルプレイヤー',
-       answer: index,
-       correct: isCorrect,
-       timeLeft: gameState.timeLeft
-   };
-   
-   gameState.currentAnswers.push(answerData);
-   
-   if (isCorrect) {
-       choices[index].classList.add('correct');
-       playSound('correct');
-   } else {
-       choices[index].classList.add('incorrect');
-       choices[question.correct].classList.add('correct');
-       playSound('incorrect');
-   }
-   
-   updateAnswerLog();
-   
-   setTimeout(() => {
-       nextQuestion();
-   }, 2000);
+    if (gameState.currentAnswers.some(answer => answer.playerId)) {
+        return; // 既に回答済み
+    }
+    
+    stopTimer();
+    
+    const choices = document.querySelectorAll('.choice');
+    choices.forEach(choice => {
+        choice.style.pointerEvents = 'none';
+        choice.classList.add('disabled');
+    });
+    choices[index].classList.add('selected');
+    
+    const question = gameState.questions[gameState.currentQuestion];
+    const isCorrect = index === question.correct;
+    
+    // ローカルゲームでは全プレイヤーが同時に回答したとして処理
+    gameState.players.forEach((player, playerIndex) => {
+        const answerData = {
+            playerId: player.id,
+            playerName: player.name,
+            answer: index,
+            correct: isCorrect,
+            timeLeft: gameState.timeLeft,
+            order: gameState.currentAnswers.filter(a => a.correct).length + 1
+        };
+        
+        if (isCorrect) {
+            // 早押しボーナス: 15秒 - 経過時間 + 順位ボーナス
+            const timeBonus = gameState.timeLeft;
+            const orderBonus = Math.max(0, 6 - answerData.order);
+            const points = 10 + timeBonus + orderBonus;
+            gameState.scores[player.id] += points;
+        }
+        
+        gameState.currentAnswers.push(answerData);
+    });
+    
+    if (isCorrect) {
+        choices[index].classList.add('correct');
+        playSound('correct');
+    } else {
+        choices[index].classList.add('incorrect');
+        choices[question.correct].classList.add('correct');
+        playSound('incorrect');
+    }
+    
+    updateAnswerLog();
+    
+    setTimeout(() => {
+        nextQuestion();
+    }, 2000);
 }
 
-// 回答ログ更新
 function updateAnswerLog() {
-   const answerList = document.getElementById('answerList');
-   if (!answerList) return;
-   
-   answerList.innerHTML = gameState.currentAnswers.map((answer, index) => `
-       <div class="answer-log ${answer.correct ? 'correct' : 'incorrect'}">
-           <span>${index + 1}位: ${answer.player}</span>
-           <span>${answer.correct ? '正解' : '不正解'} (${answer.timeLeft}秒)</span>
-       </div>
-   `).join('');
+    const answerList = document.getElementById('answerList');
+    if (!answerList) return;
+    
+    const correctAnswers = gameState.currentAnswers.filter(a => a.correct);
+    correctAnswers.sort((a, b) => b.timeLeft - a.timeLeft);
+    
+    answerList.innerHTML = correctAnswers.map((answer, index) => `
+        <div class="answer-item correct">
+            <span class="answer-order">${index + 1}位</span>
+            <span>${answer.playerName}</span>
+            <span class="answer-points">+${10 + answer.timeLeft + Math.max(0, 6 - (index + 1))}pt</span>
+        </div>
+    `).join('');
 }
 
-// 次の問題
 function nextQuestion() {
-   gameState.currentQuestion++;
-   if (gameState.currentQuestion >= gameState.questions.length) {
-       showResults();
-   } else {
-       showQuestion();
-   }
+    gameState.currentQuestion++;
+    if (gameState.currentQuestion >= gameState.questions.length) {
+        showResults();
+    } else {
+        showQuestion();
+    }
 }
 
 // 結果表示
 function showResults() {
-   stopTimer();
-   showScreen('resultScreen');
-   
-   const sortedPlayers = gameState.players.sort((a, b) => 
-       gameState.scores[b.id] - gameState.scores[a.id]
-   );
-   
-   const resultsDiv = document.getElementById('results');
-   resultsDiv.innerHTML = sortedPlayers.map((player, index) => `
-       <div class="rank-item rank-${Math.min(index + 1, 3)}">
-           <div>
-               <span class="rank-number">${index + 1}位</span>
-               <span>${player.name}</span>
-           </div>
-           <div>${gameState.scores[player.id]}ポイント</div>
-       </div>
-   `).join('');
+    stopTimer();
+    showScreen('resultScreen');
+    
+    const sortedPlayers = gameState.players.sort((a, b) => 
+        gameState.scores[b.id] - gameState.scores[a.id]
+    );
+    
+    const resultsDiv = document.getElementById('results');
+    resultsDiv.innerHTML = sortedPlayers.map((player, index) => `
+        <div class="rank-item rank-${Math.min(index + 1, 3)}">
+            <div>
+                <span class="rank-number">${index + 1}</span>
+                <span>${player.name}</span>
+            </div>
+            <div>${gameState.scores[player.id]}ポイント</div>
+        </div>
+    `).join('');
 }
 
-// WebSocket接続管理
-function initWebSocket() {
-   const isProduction = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
-   
-   let wsUrl;
-   if (isProduction) {
-       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-       wsUrl = `${protocol}//${window.location.host}`;
-   } else {
-       wsUrl = 'ws://localhost:8080';
-   }
-   
-   console.log('WebSocket接続先:', wsUrl);
-   
-   try {
-       gameState.onlineState.ws = new WebSocket(wsUrl);
-       
-       gameState.onlineState.ws.onopen = () => {
-           console.log('WebSocket接続成功');
-           updateConnectionStatus(true);
-       };
-       
-       gameState.onlineState.ws.onclose = () => {
-           console.log('WebSocket接続切断');
-           updateConnectionStatus(false);
-       };
-       
-       gameState.onlineState.ws.onmessage = (event) => {
-           handleWebSocketMessage(JSON.parse(event.data));
-       };
-       
-       gameState.onlineState.ws.onerror = (error) => {
-           console.error('WebSocketエラー:', error);
-           updateConnectionStatus(false);
-       };
-   } catch (error) {
-       console.error('WebSocket接続失敗:', error);
-       updateConnectionStatus(false);
-   }
+function resetGame() {
+    gameState.players = [];
+    gameState.scores = {};
+    gameState.currentQuestion = 0;
+    gameState.selectedCategories = [];
+    stopTimer();
+    showScreen('playerScreen');
 }
 
-function handleWebSocketMessage(data) {
-   console.log('受信:', data);
-   
-   switch(data.type) {
-       case 'roomCreated':
-           gameState.onlineState.roomId = data.roomId;
-           gameState.onlineState.playerId = data.playerId;
-           gameState.onlineState.isHost = true;
-           document.getElementById('roomIdDisplay').textContent = `ルームID: ${data.roomId}`;
-           showScreen('onlineWaitingScreen');
-           updateOnlinePlayerList(data.players);
-           document.getElementById('startOnlineGameBtn').style.display = 'block';
-           break;
-           
-       case 'joinedRoom':
-           gameState.onlineState.roomId = data.roomId;
-           gameState.onlineState.playerId = data.playerId;
-           gameState.onlineState.isHost = false;
-           showScreen('onlineWaitingScreen');
-           document.getElementById('startOnlineGameBtn').style.display = 'none';
-           break;
-           
-       case 'playerJoined':
-       case 'playerLeft':
-       case 'playerReady':
-           updateOnlinePlayerList(data.players);
-           if (data.type === 'playerLeft' && gameState.onlineState.isHost) {
-               document.getElementById('startOnlineGameBtn').style.display = 'block';
-           }
-           break;
-           
-       case 'newHost':
-           if (data.hostId === gameState.onlineState.playerId) {
-               gameState.onlineState.isHost = true;
-               document.getElementById('startOnlineGameBtn').style.display = 'block';
-           }
-           break;
-           
-       case 'gameStart':
-           startOnlineQuiz(data.questions);
-           break;
-           
-       case 'newQuestion':
-           showOnlineQuestion(data);
-           break;
-           
-       case 'answerResult':
-           handleOnlineAnswerResult(data);
-           break;
-           
-       case 'gameEnd':
-           showOnlineResults(data.scores);
-           break;
-           
-       case 'error':
-           alert(data.message);
-           break;
-   }
+// 問題作成機能
+function addQuestion() {
+    const category = document.getElementById('questionCategory').value;
+    const questionText = document.getElementById('newQuestion').value.trim();
+    const choice1 = document.getElementById('choice1').value.trim();
+    const choice2 = document.getElementById('choice2').value.trim();
+    const choice3 = document.getElementById('choice3').value.trim();
+    const correctAnswer = parseInt(document.getElementById('correctAnswer').value) - 1;
+    
+    if (!questionText || !choice1 || !choice2 || !choice3) {
+        alert('すべての項目を入力してください');
+        return;
+    }
+    
+    if (correctAnswer < 0 || correctAnswer > 2) {
+        alert('正解の選択肢番号は1-3の範囲で入力してください');
+        return;
+    }
+    
+    const newQuestion = {
+        question: questionText,
+        choices: [choice1, choice2, choice3],
+        correct: correctAnswer,
+        category: category
+    };
+    
+    customQuestions.push(newQuestion);
+    
+    // フォームクリア
+    document.getElementById('newQuestion').value = '';
+    document.getElementById('choice1').value = '';
+    document.getElementById('choice2').value = '';
+    document.getElementById('choice3').value = '';
+    document.getElementById('correctAnswer').value = '';
+    
+    updateQuestionList();
+    alert('問題を追加しました！');
 }
 
-// 接続状態更新
-function updateConnectionStatus(connected) {
-   gameState.onlineState.connected = connected;
-   const statusDiv = document.getElementById('connectionStatus');
-   if (statusDiv) {
-       statusDiv.textContent = connected ? '✅ サーバーに接続中' : '❌ サーバーに未接続';
-       statusDiv.className = connected ? 'connection-status connected' : 'connection-status disconnected';
-   }
+function updateQuestionList() {
+    const questionList = document.getElementById('questionList');
+    if (!questionList) return;
+    
+    questionList.innerHTML = customQuestions.map((question, index) => `
+        <div class="question-item">
+            <strong>Q${index + 1}:</strong> ${question.question}<br>
+            <small>カテゴリ: ${categories[question.category].name}</small><br>
+            <small>選択肢: ${question.choices.join(', ')}</small><br>
+            <small>正解: ${question.choices[question.correct]}</small>
+            <button class="btn btn-danger" onclick="removeQuestion(${index})">削除</button>
+        </div>
+    `).join('');
 }
 
-// ルーム作成
-function createOnlineRoom() {
-   const playerName = document.getElementById('onlinePlayerName').value.trim();
-   if (!playerName) {
-       alert('プレイヤー名を入力してください');
-       return;
-   }
-   
-   if (!gameState.onlineState.ws || gameState.onlineState.ws.readyState !== WebSocket.OPEN) {
-       alert('サーバーに接続されていません');
-       return;
-   }
-   
-   gameState.onlineState.ws.send(JSON.stringify({
-       type: 'createRoom',
-       playerName: playerName
-   }));
+function removeQuestion(index) {
+    if (confirm('この問題を削除しますか？')) {
+        customQuestions.splice(index, 1);
+        updateQuestionList();
+    }
 }
 
-// ルーム参加
-function joinOnlineRoom() {
-   const playerName = document.getElementById('onlinePlayerName').value.trim();
-   const roomId = document.getElementById('roomIdInput').value.trim().toUpperCase();
-   
-   if (!playerName) {
-       alert('プレイヤー名を入力してください');
-       return;
-   }
-   
-   if (!roomId) {
-       alert('ルームIDを入力してください');
-       return;
-   }
-   
-   if (!gameState.onlineState.ws || gameState.onlineState.ws.readyState !== WebSocket.OPEN) {
-       alert('サーバーに接続されていません');
-       return;
-   }
-   
-   gameState.onlineState.ws.send(JSON.stringify({
-       type: 'joinRoom',
-       playerName: playerName,
-       roomId: roomId
-   }));
+// オンライン機能（WebSocketサーバーが必要）
+function createRoom() {
+    alert('オンライン機能は現在開発中です');
 }
 
-// プレイヤー準備状態切り替え
+function showJoinRoom() {
+    showScreen('joinRoomScreen');
+}
+
+function joinRoom() {
+    alert('オンライン機能は現在開発中です');
+}
+
 function togglePlayerReady() {
-   if (!gameState.onlineState.playerId || !gameState.onlineState.ws) {
-       return;
-   }
-   
-   gameState.onlineState.ws.send(JSON.stringify({
-       type: 'ready',
-       playerId: gameState.onlineState.playerId
-   }));
+    alert('オンライン機能は現在開発中です');
 }
 
-// オンラインゲーム開始
 function startOnlineGame() {
-   if (!gameState.onlineState.isHost) {
-       alert('ホストのみがゲームを開始できます');
-       return;
-   }
-   
-   if (!gameState.onlineState.roomId || !gameState.onlineState.playerId) {
-       alert('ルーム情報が正しくありません');
-       return;
-   }
-   
-   console.log('ゲーム開始リクエスト送信:', {
-       roomId: gameState.onlineState.roomId,
-       playerId: gameState.onlineState.playerId,
-       isHost: gameState.onlineState.isHost
-   });
-   
-   gameState.onlineState.ws.send(JSON.stringify({
-       type: 'startGame',
-       roomId: gameState.onlineState.roomId,
-       playerId: gameState.onlineState.playerId
-   }));
+    alert('オンライン機能は現在開発中です');
 }
 
-// オンラインプレイヤーリスト更新
-function updateOnlinePlayerList(players) {
-   const playerListDiv = document.getElementById('onlinePlayerList');
-   if (!playerListDiv) return;
-   
-   playerListDiv.innerHTML = players.map(player => `
-       <div class="player-item ${player.ready ? 'ready' : ''}">
-           <span>${player.name}</span>
-           <span class="ready-status">${player.ready ? '準備完了' : '待機中'}</span>
-           ${player.id === gameState.onlineState.playerId ? '<span class="you-label">(あなた)</span>' : ''}
-           ${player.id === gameState.onlineState.roomId ? '<span class="host-label">(ホスト)</span>' : ''}
-       </div>
-   `).join('');
-}
-
-// オンライン問題表示
-function showOnlineQuestion(data) {
-   stopTimer();
-   
-   gameState.currentQuestion = data.questionNumber - 1;
-   gameState.questions = [data.question];
-   gameState.currentAnswers = [];
-   
-   showScreen('quizScreen');
-   
-   document.getElementById('questionText').textContent = data.question.question;
-   document.getElementById('questionNumber').textContent = `問題 ${data.questionNumber} / ${data.totalQuestions}`;
-   
-   const choicesDiv = document.getElementById('choices');
-   choicesDiv.innerHTML = data.question.choices.map((choice, index) => `
-       <button class="choice" onclick="selectOnlineChoice(${index})">${choice}</button>
-   `).join('');
-   
-   document.getElementById('answerList').innerHTML = '';
-   
-   setTimeout(() => {
-       startTimer();
-   }, 100);
-}
-
-// オンライン選択肢選択
-function selectOnlineChoice(index) {
-   if (gameState.currentAnswers.some(answer => answer.player === 'あなた')) {
-       return;
-   }
-   
-   stopTimer();
-   
-   const choices = document.querySelectorAll('.choice');
-   choices.forEach(choice => choice.disabled = true);
-   choices[index].classList.add('selected');
-   
-   gameState.onlineState.ws.send(JSON.stringify({
-       type: 'selectAnswer',
-       roomId: gameState.onlineState.roomId,
-       playerId: gameState.onlineState.playerId,
-       answerIndex: index
-   }));
-}
-
-// オンライン回答結果処理
-function handleOnlineAnswerResult(data) {
-   const answerData = {
-       player: data.playerName === getCurrentPlayerName() ? 'あなた' : data.playerName,
-       answer: data.answerIndex,
-       correct: data.correct,
-       timeLeft: gameState.timeLeft,
-       order: data.currentAnswers.filter(a => a.correct).length
-   };
-   
-   gameState.currentAnswers.push(answerData);
-   
-   const choices = document.querySelectorAll('.choice');
-   if (data.correct) {
-       choices[data.answerIndex].classList.add('correct');
-       playSound('correct');
-   } else {
-       choices[data.answerIndex].classList.add('incorrect');
-       playSound('incorrect');
-   }
-   
-   updateAnswerLog();
-}
-
-// 現在のプレイヤー名を取得
-function getCurrentPlayerName() {
-   return document.getElementById('onlinePlayerName').value.trim();
-}
-
-// オンライン結果表示
-function showOnlineResults(scores) {
-   stopTimer();
-   showScreen('resultScreen');
-   
-   const resultsDiv = document.getElementById('results');
-   resultsDiv.innerHTML = scores.map((player, index) => `
-       <div class="rank-item rank-${Math.min(index + 1, 3)}">
-           <div>
-               <span class="rank-number">${index + 1}位</span>
-               <span>${player.playerName}${player.playerId === gameState.onlineState.playerId ? ' (あなた)' : ''}</span>
-           </div>
-           <div>${player.score}ポイント</div>
-       </div>
-   `).join('');
-}
-
-// オンラインクイズ開始
-function startOnlineQuiz(questions) {
-   gameState.questions = questions;
-   gameState.currentQuestion = 0;
-   gameState.mode = 'online';
-   
-   playSound('start');
-}
-
-// ルーム退出
 function leaveOnlineRoom() {
-   if (gameState.onlineState.playerId && gameState.onlineState.ws) {
-       gameState.onlineState.ws.send(JSON.stringify({
-           type: 'leaveRoom',
-           playerId: gameState.onlineState.playerId
-       }));
-   }
-   
-   gameState.onlineState.roomId = null;
-   gameState.onlineState.playerId = null;
-   gameState.onlineState.isHost = false;
-   
-   showScreen('onlineMenuScreen');
+    showScreen('onlineMenuScreen');
 }
 
-// ページ離脱時にタイマーをクリア
-window.addEventListener('beforeunload', () => {
-   stopTimer();
-});
-
-// タブが非アクティブになった時にタイマーを停止
-document.addEventListener('visibilitychange', () => {
-   if (document.hidden && gameState.mode === 'online') {
-       stopTimer();
-   }
-});
+// 初期化
+function init() {
+    console.log('早押しクイズバトル初期化完了');
+}
 
 // ページ読み込み完了時に初期化
 document.addEventListener('DOMContentLoaded', init);
