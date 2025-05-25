@@ -60,6 +60,66 @@ const defaultQuestions = {
             choices: ["60位", "61位", "62位"],
             correct: 1,
             category: "general"
+        },
+        {
+            question: "日本の国鳥は？",
+            choices: ["ツル", "キジ", "ハト"],
+            correct: 1,
+            category: "general"
+        },
+        {
+            question: "1年は何日？",
+            choices: ["364日", "365日", "366日"],
+            correct: 1,
+            category: "general"
+        },
+        {
+            question: "日本で一番人口の多い都道府県は？",
+            choices: ["東京都", "大阪府", "神奈川県"],
+            correct: 0,
+            category: "general"
+        },
+        {
+            question: "血液型で最も多いのは？",
+            choices: ["A型", "B型", "O型"],
+            correct: 0,
+            category: "general"
+        },
+        {
+            question: "日本語で「ありがとう」を英語では？",
+            choices: ["Hello", "Thank you", "Good bye"],
+            correct: 1,
+            category: "general"
+        },
+        {
+            question: "地球の表面の約何割が海？",
+            choices: ["5割", "7割", "9割"],
+            correct: 1,
+            category: "general"
+        },
+        {
+            question: "虹は何色？",
+            choices: ["5色", "7色", "9色"],
+            correct: 1,
+            category: "general"
+        },
+        {
+            question: "一日は何時間？",
+            choices: ["22時間", "24時間", "26時間"],
+            correct: 1,
+            category: "general"
+        },
+        {
+            question: "日本の国歌は？",
+            choices: ["君が代", "さくらさくら", "ふるさと"],
+            correct: 0,
+            category: "general"
+        },
+        {
+            question: "カレンダーで1週間は何日？",
+            choices: ["6日", "7日", "8日"],
+            correct: 1,
+            category: "general"
         }
     ],
     geography: [
@@ -90,6 +150,66 @@ const defaultQuestions = {
         {
             question: "日本最大の島は？",
             choices: ["北海道", "本州", "九州"],
+            correct: 1,
+            category: "geography"
+        },
+        {
+            question: "世界最高峰の山は？",
+            choices: ["富士山", "エベレスト", "キリマンジャロ"],
+            correct: 1,
+            category: "geography"
+        },
+        {
+            question: "世界で一番大きな海洋は？",
+            choices: ["大西洋", "太平洋", "インド洋"],
+            correct: 1,
+            category: "geography"
+        },
+        {
+            question: "オーストラリアの首都は？",
+            choices: ["シドニー", "メルボルン", "キャンベラ"],
+            correct: 2,
+            category: "geography"
+        },
+        {
+            question: "ブラジルの首都は？",
+            choices: ["リオデジャネイロ", "サンパウロ", "ブラジリア"],
+            correct: 2,
+            category: "geography"
+        },
+        {
+            question: "エジプトを流れる有名な川は？",
+            choices: ["ナイル川", "アマゾン川", "ミシシッピ川"],
+            correct: 0,
+            category: "geography"
+        },
+        {
+            question: "アメリカとメキシコの国境にある川は？",
+            choices: ["コロラド川", "リオグランデ川", "ミズーリ川"],
+            correct: 1,
+            category: "geography"
+        },
+        {
+            question: "地球の赤道の長さは約？",
+            choices: ["4万km", "6万km", "8万km"],
+            correct: 0,
+            category: "geography"
+        },
+        {
+            question: "サハラ砂漠があるのは？",
+            choices: ["アジア", "アフリカ", "南アメリカ"],
+            correct: 1,
+            category: "geography"
+        },
+        {
+            question: "ヒマラヤ山脈があるのは？",
+            choices: ["アフリカ", "アジア", "ヨーロッパ"],
+            correct: 1,
+            category: "geography"
+        },
+        {
+            question: "世界で一番小さな国は？",
+            choices: ["モナコ", "バチカン市国", "サンマリノ"],
             correct: 1,
             category: "geography"
         }
@@ -124,6 +244,66 @@ const defaultQuestions = {
             choices: ["奈良", "京都", "鎌倉"],
             correct: 1,
             category: "history"
+        },
+        {
+            question: "織田信長を討ったのは誰？",
+            choices: ["豊臣秀吉", "明智光秀", "徳川家康"],
+            correct: 1,
+            category: "history"
+        },
+        {
+            question: "関ヶ原の戦いは何年？",
+            choices: ["1600年", "1603年", "1615年"],
+            correct: 0,
+            category: "history"
+        },
+        {
+            question: "奈良時代の都は？",
+            choices: ["平城京", "平安京", "藤原京"],
+            correct: 0,
+            category: "history"
+        },
+        {
+            question: "日本初の元号は？",
+            choices: ["大化", "白雉", "朱鳥"],
+            correct: 0,
+            category: "history"
+        },
+        {
+            question: "聖徳太子が制定したとされる法律は？",
+            choices: ["大宝律令", "十七条憲法", "養老律令"],
+            correct: 1,
+            category: "history"
+        },
+        {
+            question: "室町幕府を開いたのは誰？",
+            choices: ["足利尊氏", "足利義満", "足利義政"],
+            correct: 0,
+            category: "history"
+        },
+        {
+            question: "戦国時代の三英傑といえば？",
+            choices: ["信長・秀吉・家康", "信長・秀吉・光秀", "秀吉・家康・政宗"],
+            correct: 0,
+            category: "history"
+        },
+        {
+            question: "ペリーが来航したのは何年？",
+            choices: ["1853年", "1854年", "1855年"],
+            correct: 0,
+            category: "history"
+        },
+        {
+            question: "大政奉還を行ったのは誰？",
+            choices: ["徳川慶喜", "徳川家茂", "徳川家定"],
+            correct: 0,
+            category: "history"
+        },
+        {
+            question: "日清戦争が起こったのは？",
+            choices: ["1894年", "1904年", "1914年"],
+            correct: 0,
+            category: "history"
         }
     ],
     science: [
@@ -155,6 +335,66 @@ const defaultQuestions = {
             question: "重力加速度は約？",
             choices: ["9.8m/s²", "8.9m/s²", "10.2m/s²"],
             correct: 0,
+            category: "science"
+        },
+        {
+            question: "人間の体温は約何度？",
+            choices: ["35度", "36度", "37度"],
+            correct: 1,
+            category: "science"
+        },
+        {
+            question: "音速は約？",
+            choices: ["240m/秒", "340m/秒", "440m/秒"],
+            correct: 1,
+            category: "science"
+        },
+        {
+            question: "地球の公転周期は？",
+            choices: ["365日", "366日", "364日"],
+            correct: 0,
+            category: "science"
+        },
+        {
+            question: "人間の骨の数は約？",
+            choices: ["106本", "206本", "306本"],
+            correct: 1,
+            category: "science"
+        },
+        {
+            question: "血液の約何割が水分？",
+            choices: ["約5割", "約7割", "約9割"],
+            correct: 2,
+            category: "science"
+        },
+        {
+            question: "金の化学記号は？",
+            choices: ["Go", "Au", "Ag"],
+            correct: 1,
+            category: "science"
+        },
+        {
+            question: "二酸化炭素の化学式は？",
+            choices: ["CO", "CO2", "C2O"],
+            correct: 1,
+            category: "science"
+        },
+        {
+            question: "人間の心臓は何個？",
+            choices: ["1個", "2個", "4個"],
+            correct: 0,
+            category: "science"
+        },
+        {
+            question: "地球の自転周期は？",
+            choices: ["23時間", "24時間", "25時間"],
+            correct: 1,
+            category: "science"
+        },
+        {
+            question: "太陽系で一番大きな惑星は？",
+            choices: ["土星", "木星", "海王星"],
+            correct: 1,
             category: "science"
         }
     ],
@@ -188,6 +428,66 @@ const defaultQuestions = {
             choices: ["ウィンブルドン", "全仏オープン", "マスターズ"],
             correct: 2,
             category: "sports"
+        },
+        {
+            question: "サッカーで手を使っても良いのは？",
+            choices: ["ゴールキーパー", "ディフェンダー", "誰でもない"],
+            correct: 0,
+            category: "sports"
+        },
+        {
+            question: "マラソンの距離は？",
+            choices: ["40.195km", "42.195km", "44.195km"],
+            correct: 1,
+            category: "sports"
+        },
+        {
+            question: "野球で満塁ホームランは何点？",
+            choices: ["3点", "4点", "5点"],
+            correct: 1,
+            category: "sports"
+        },
+        {
+            question: "バレーボールで1チームは何人？",
+            choices: ["5人", "6人", "7人"],
+            correct: 1,
+            category: "sports"
+        },
+        {
+            question: "ゴルフで基準打数より1打少ないのは？",
+            choices: ["イーグル", "バーディー", "アルバトロス"],
+            correct: 1,
+            category: "sports"
+        },
+        {
+            question: "相撲の最高位は？",
+            choices: ["大関", "横綱", "関脇"],
+            correct: 1,
+            category: "sports"
+        },
+        {
+            question: "卓球で使うボールの色は？",
+            choices: ["白またはオレンジ", "白または黄色", "白または赤"],
+            correct: 0,
+            category: "sports"
+        },
+        {
+            question: "オリンピックは何年ごと？",
+            choices: ["2年", "4年", "6年"],
+            correct: 1,
+            category: "sports"
+        },
+        {
+            question: "柔道で一本勝ちする技は？",
+            choices: ["投げ技のみ", "投げ技・固め技・当て身技", "投げ技・固め技・絞め技・関節技"],
+            correct: 2,
+            category: "sports"
+        },
+        {
+            question: "箱根駅伝は何区間？",
+            choices: ["8区間", "10区間", "12区間"],
+            correct: 1,
+            category: "sports"
         }
     ],
     entertainment: [
@@ -218,6 +518,66 @@ const defaultQuestions = {
         {
             question: "「となりのトトロ」に登場するキャラクターは？",
             choices: ["ネコバス", "魔女の宅急便", "ハウル"],
+            correct: 0,
+            category: "entertainment"
+        },
+        {
+            question: "ドラえもんの好物は？",
+            choices: ["たい焼き", "どら焼き", "大福"],
+            correct: 1,
+            category: "entertainment"
+        },
+        {
+            question: "「アナと雪の女王」の主題歌は？",
+            choices: ["Let It Go", "Beauty and the Beast", "A Whole New World"],
+            correct: 0,
+            category: "entertainment"
+        },
+        {
+            question: "「君の名は。」の監督は？",
+            choices: ["新海誠", "細田守", "庵野秀明"],
+            correct: 0,
+            category: "entertainment"
+        },
+        {
+            question: "スーパーマリオの生みの親は？",
+            choices: ["宮本茂", "坂口博信", "堀井雄二"],
+            correct: 0,
+            category: "entertainment"
+        },
+        {
+            question: "ハリー・ポッターが通う学校は？",
+            choices: ["ホグワーツ", "ボーバトン", "ダームストラング"],
+            correct: 0,
+            category: "entertainment"
+        },
+        {
+            question: "スターウォーズでフォースの暗黒面に落ちたのは？",
+            choices: ["ルーク", "アナキン", "オビワン"],
+            correct: 1,
+            category: "entertainment"
+        },
+        {
+            question: "ディズニーで最初のフルカラー長編アニメは？",
+            choices: ["白雪姫", "シンデレラ", "眠れる森の美女"],
+            correct: 0,
+            category: "entertainment"
+        },
+        {
+            question: "「名探偵コナン」の主人公の本名は？",
+            choices: ["工藤新一", "江戸川コナン", "毛利蘭"],
+            correct: 0,
+            category: "entertainment"
+        },
+        {
+            question: "「ナルト」の主人公が目指すのは？",
+            choices: ["火影", "水影", "土影"],
+            correct: 0,
+            category: "entertainment"
+        },
+        {
+            question: "「進撃の巨人」の作者は？",
+            choices: ["諫山創", "尾田栄一郎", "岸本斉史"],
             correct: 0,
             category: "entertainment"
         }
