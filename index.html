@@ -1081,6 +1081,7 @@ function handleWebSocketMessage(data) {
         case 'playerJoined':
         case 'playerLeft':
         case 'playerReady':
+        case 'playerUpdate':
             updateOnlinePlayerList(data.players);
             if (data.type === 'playerLeft' && gameState.onlineState.isHost) {
                 document.getElementById('startOnlineGameBtn').style.display = 'block';
@@ -1110,6 +1111,13 @@ function handleWebSocketMessage(data) {
             handleOnlineQuestionEnd(data);
             break;
             
+        case 'nextQuestion':
+            // 次の問題への準備
+            setTimeout(() => {
+                console.log('次の問題を待機中...');
+            }, 1000);
+            break;
+            
         case 'gameEnd':
             showOnlineResults(data.finalScores);
             break;
@@ -1117,6 +1125,9 @@ function handleWebSocketMessage(data) {
         case 'error':
             alert(data.message);
             break;
+            
+        default:
+            console.log('未処理のメッセージタイプ:', data.type);
     }
 }
 
@@ -1435,26 +1446,35 @@ function selectChoiceLocal(index) {
 
 function selectChoiceOnline(index) {
     if (gameState.hasAnswered) {
-        return; // 既に回答済み
+        console.log('既に回答済みです');
+        return;
     }
     
+    console.log(`選択肢${index}を選択しました`);
     gameState.hasAnswered = true;
     
     const choices = document.querySelectorAll('.choice');
-    choices.forEach(choice => {
+    choices.forEach((choice, i) => {
+        if (i === index) {
+            choice.classList.add('selected');
+        }
         choice.style.pointerEvents = 'none';
         choice.classList.add('disabled');
     });
-    choices[index].classList.add('selected');
     
     if (gameState.onlineState.ws && gameState.onlineState.ws.readyState === WebSocket.OPEN) {
-        gameState.onlineState.ws.send(JSON.stringify({
+        const message = {
             type: 'selectAnswer',
             roomId: gameState.onlineState.roomId,
             playerId: gameState.onlineState.playerId,
             answerIndex: index,
             timeLeft: gameState.timeLeft || 15
-        }));
+        };
+        
+        console.log('回答送信:', message);
+        gameState.onlineState.ws.send(JSON.stringify(message));
+    } else {
+        console.error('WebSocket接続が無効です');
     }
 }
 
@@ -1757,15 +1777,19 @@ function joinRoom() {
 }
 
 function togglePlayerReady() {
-    if (!gameState.onlineState.playerId || !gameState.onlineState.ws) {
+    if (!gameState.onlineState.playerId || !gameState.onlineState.ws || gameState.onlineState.ws.readyState !== WebSocket.OPEN) {
+        console.error('WebSocket接続が無効です');
         return;
     }
     
-    gameState.onlineState.ws.send(JSON.stringify({
+    const message = {
         type: 'toggleReady',
         playerId: gameState.onlineState.playerId,
         roomId: gameState.onlineState.roomId
-    }));
+    };
+    
+    console.log('準備状態切り替え送信:', message);
+    gameState.onlineState.ws.send(JSON.stringify(message));
 }
 
 function startOnlineGame() {
@@ -1832,12 +1856,20 @@ function startOnlineQuiz(questions) {
 }
 
 function showOnlineQuestion(data) {
-    // オンライン時はタイマーを停止しない
+    console.log('オンライン問題表示:', data);
+    
+    // 現在の問題番号を正確に設定
     gameState.currentQuestion = data.questionNumber - 1;
     gameState.currentAnswers = [];
     gameState.hasAnswered = false;
     
+    // 必ずクイズ画面を表示
     showScreen('quizScreen');
+    
+    // 問題データを保存
+    if (!gameState.questions[gameState.currentQuestion]) {
+        gameState.questions[gameState.currentQuestion] = data.question;
+    }
     
     document.getElementById('questionText').textContent = data.question.question;
     document.getElementById('questionNumber').textContent = `第${data.questionNumber}問 / ${data.totalQuestions}問`;
@@ -1847,13 +1879,24 @@ function showOnlineQuestion(data) {
         <div class="choice" onclick="selectChoice(${index})">${choice}</div>
     `).join('');
     
-    document.getElementById('answerList').innerHTML = '';
+    // 回答ログをクリア
+    const answerList = document.getElementById('answerList');
+    if (answerList) {
+        answerList.innerHTML = '<h4>回答状況</h4>';
+    }
     
-    // オンライン時はサーバーサイドタイマーに任せる
-    document.getElementById('timer').textContent = '15';
+    // タイマー表示をリセット
+    const timerElement = document.getElementById('timer');
+    if (timerElement) {
+        timerElement.textContent = '15';
+    }
+    
+    console.log(`問題${data.questionNumber}を表示しました`);
 }
 
 function handleOnlineAnswerReceived(data) {
+    console.log('回答受信:', data);
+    
     const answerData = {
         playerId: data.playerId,
         playerName: data.playerName,
@@ -1868,33 +1911,55 @@ function handleOnlineAnswerReceived(data) {
     const answerList = document.getElementById('answerList');
     if (answerList) {
         const isYou = data.playerId === gameState.onlineState.playerId;
-        answerList.innerHTML += `
+        
+        // 既存の内容に追加
+        let currentHTML = answerList.innerHTML;
+        if (!currentHTML.includes('<h4>回答状況</h4>')) {
+            currentHTML = '<h4>回答状況</h4>';
+        }
+        
+        const newAnswerHTML = `
             <div class="answer-item">
                 <span class="answer-order">${data.answerOrder}番目</span>
                 <span>${data.playerName}${isYou ? ' (あなた)' : ''}</span>
                 <span>回答時間: ${data.timeLeft}秒</span>
             </div>
         `;
+        
+        answerList.innerHTML = currentHTML + newAnswerHTML;
     }
 }
 
 function handleOnlineQuestionEnd(data) {
+    console.log('問題終了:', data);
+    
     const question = data.question;
     const choices = document.querySelectorAll('.choice');
     
+    // すべての選択肢を無効化
+    choices.forEach(choice => {
+        choice.style.pointerEvents = 'none';
+        choice.classList.add('disabled');
+    });
+    
     // 正解を表示
-    choices[question.correct].classList.add('correct');
+    if (choices[question.correct]) {
+        choices[question.correct].classList.add('correct');
+    }
     
     // 各プレイヤーの回答結果を表示
     data.results.forEach(result => {
-        if (result.answer !== question.correct && result.answer >= 0) {
+        if (result.answer !== question.correct && result.answer >= 0 && choices[result.answer]) {
             choices[result.answer].classList.add('incorrect');
         }
         
-        if (result.correct) {
-            playSound('correct');
-        } else if (result.playerId === gameState.onlineState.playerId) {
-            playSound('incorrect');
+        // 自分の回答に対してのみ音を鳴らす
+        if (result.playerId === gameState.onlineState.playerId) {
+            if (result.correct) {
+                playSound('correct');
+            } else {
+                playSound('incorrect');
+            }
         }
     });
     
@@ -1903,20 +1968,28 @@ function handleOnlineQuestionEnd(data) {
     if (answerList) {
         const correctAnswers = data.results.filter(r => r.correct).sort((a, b) => b.timeLeft - a.timeLeft);
         
-        answerList.innerHTML = `
-            <h4>回答結果</h4>
-            ${correctAnswers.map((result, index) => {
+        let logHTML = '<h4>回答結果</h4>';
+        if (correctAnswers.length > 0) {
+            logHTML += correctAnswers.map((result, index) => {
                 const isYou = result.playerId === gameState.onlineState.playerId;
                 return `
                     <div class="answer-item correct">
                         <span class="answer-order">${index + 1}位</span>
                         <span>${result.playerName}${isYou ? ' (あなた)' : ''}</span>
-                        <span class="answer-points">+${result.points}pt</span>
+                        <span class="answer-points">+${result.points || 0}pt</span>
                     </div>
                 `;
-            }).join('')}
-        `;
+            }).join('');
+        } else {
+            logHTML += '<div class="answer-item">正解者なし</div>';
+        }
+        
+        answerList.innerHTML = logHTML;
     }
+    
+    console.log(`問題${gameState.currentQuestion + 1}の結果を表示しました`);
+    
+    // 次の問題への準備（サーバーからの指示を待つ）
 }
 
 function showOnlineResults(finalScores) {
