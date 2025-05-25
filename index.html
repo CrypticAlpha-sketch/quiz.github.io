@@ -1807,25 +1807,122 @@ function startOnlineGame() {
         return;
     }
     
-    // 選択可能な問題を準備
-    let questions = [];
-    Object.values(defaultQuestions).forEach(categoryQuestions => {
-        questions = questions.concat(categoryQuestions);
-    });
+    // カテゴリ選択ダイアログを表示
+    showCategorySelectionDialog();
+}
+
+function showCategorySelectionDialog() {
+    const dialog = document.createElement('div');
+    dialog.id = 'categoryDialog';
+    dialog.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.7);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 10000;
+    `;
     
-    const saved = localStorage.getItem('customQuestions');
-    if (saved) {
-        questions = questions.concat(JSON.parse(saved));
+    const categories = [
+        { key: 'general', name: '一般常識' },
+        { key: 'geography', name: '地理' },
+        { key: 'history', name: '歴史' },
+        { key: 'science', name: '科学' },
+        { key: 'sports', name: 'スポーツ' },
+        { key: 'entertainment', name: 'エンタメ' }
+    ];
+    
+    const categoryButtons = categories.map(cat => 
+        `<button class="category-btn" data-category="${cat.key}" onclick="toggleDialogCategory('${cat.key}')">${cat.name}</button>`
+    ).join('');
+    
+    dialog.innerHTML = `
+        <div style="background: white; padding: 30px; border-radius: 15px; text-align: center; max-width: 500px;">
+            <h3 style="color: #764ba2; margin-bottom: 20px;">問題カテゴリを選択してください</h3>
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 20px;">
+                ${categoryButtons}
+            </div>
+            <div style="margin-bottom: 20px;">
+                <button class="btn" onclick="selectAllCategories()">全て選択</button>
+                <button class="btn" onclick="clearAllCategories()">全て解除</button>
+            </div>
+            <div>
+                <button class="btn btn-primary" onclick="startGameWithSelectedCategories()">ゲーム開始</button>
+                <button class="btn btn-danger" onclick="closeCategoryDialog()">キャンセル</button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(dialog);
+    
+    // デフォルトで全カテゴリを選択
+    selectAllCategories();
+}
+
+let selectedOnlineCategories = [];
+
+function toggleDialogCategory(category) {
+    const button = document.querySelector(`[data-category="${category}"]`);
+    const index = selectedOnlineCategories.indexOf(category);
+    
+    if (index === -1) {
+        selectedOnlineCategories.push(category);
+        button.style.background = '#764ba2';
+        button.style.color = 'white';
+    } else {
+        selectedOnlineCategories.splice(index, 1);
+        button.style.background = '#f0f0f0';
+        button.style.color = '#333';
+    }
+}
+
+function selectAllCategories() {
+    selectedOnlineCategories = ['general', 'geography', 'history', 'science', 'sports', 'entertainment'];
+    document.querySelectorAll('.category-btn').forEach(btn => {
+        btn.style.background = '#764ba2';
+        btn.style.color = 'white';
+    });
+}
+
+function clearAllCategories() {
+    selectedOnlineCategories = [];
+    document.querySelectorAll('.category-btn').forEach(btn => {
+        btn.style.background = '#f0f0f0';
+        btn.style.color = '#333';
+    });
+}
+
+function startGameWithSelectedCategories() {
+    if (selectedOnlineCategories.length === 0) {
+        alert('最低1つのカテゴリを選択してください');
+        return;
     }
     
-    questions = shuffleArray(questions).slice(0, 6);
+    closeCategoryDialog();
+    
+    // カスタム問題も含めて送信
+    const saved = localStorage.getItem('customQuestions');
+    const customQuestions = saved ? JSON.parse(saved) : [];
     
     gameState.onlineState.ws.send(JSON.stringify({
         type: 'startGame',
         roomId: gameState.onlineState.roomId,
         playerId: gameState.onlineState.playerId,
-        questions: questions
+        categories: selectedOnlineCategories,
+        questions: customQuestions
     }));
+}
+
+function closeCategoryDialog() {
+    const dialog = document.getElementById('categoryDialog');
+    if (dialog) {
+        dialog.remove();
+    }
+    selectedOnlineCategories = [];
 }
 
 function updateOnlinePlayerList(players) {
