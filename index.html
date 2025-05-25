@@ -1140,7 +1140,7 @@ function updateConnectionStatus(connected) {
     gameState.onlineState.connected = connected;
     const statusDiv = document.getElementById('connectionStatus');
     if (statusDiv) {
-        statusDiv.textContent = connected ? '✅ サーバーに接続中' : '❌ サーバーに未接続';
+        statusDiv.textContent = connected ? '✅ オンライン' : '❌ オフライン';
         statusDiv.className = connected ? 'connection-status connected' : 'connection-status disconnected';
         statusDiv.style.display = 'block';
     }
