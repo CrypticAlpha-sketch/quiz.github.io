@@ -321,7 +321,7 @@
         .form-group label {
             display: block;
             font-weight: 600;
-            color: var(--text-dark);
+            color: #2c3e50; /* 濃い色に変更（元のまま） */
             margin-bottom: 0.5rem;
             font-size: 1rem;
         }
@@ -883,6 +883,7 @@
             transition: var(--transition);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #2c3e50; /* 濃い文字色を追加 */
         }
 
         .question-item:hover {
@@ -890,6 +891,13 @@
             box-shadow: var(--shadow-medium);
         }
 
+        .form-group input::placeholder,
+        .form-group textarea::placeholder,
+        .form-group select::placeholder {
+            color: #6c757d; /* プレースホルダーを濃いグレーに */
+            opacity: 1;
+        }
+        
         /* ローディングアニメーション */
         .loading {
             display: inline-block;
