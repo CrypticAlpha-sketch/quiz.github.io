@@ -1851,17 +1851,50 @@ function showCategorySelectionDialog() {
             font-weight: bold !important;
             transition: all 0.3s ease !important;
             font-size: 14px !important;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
         }
         
         .category-btn.selected {
             background: #764ba2 !important;
             color: white !important;
             border-color: #764ba2 !important;
+            box-shadow: 0 4px 12px rgba(118, 75, 162, 0.4) !important;
+            transform: scale(1.05) !important;
         }
         
         .category-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            transform: translateY(-2px) scale(1.02) !important;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.2) !important;
+        }
+        
+        .category-btn.selected:hover {
+            transform: translateY(-2px) scale(1.05) !important;
+            box-shadow: 0 6px 16px rgba(118, 75, 162, 0.5) !important;
+        }
+        
+        /* 個別カテゴリーの識別用の色付きボーダー */
+        .category-btn[data-category="general"].selected {
+            border-left: 6px solid #ff6b6b !important;
+        }
+        
+        .category-btn[data-category="geography"].selected {
+            border-left: 6px solid #4ecdc4 !important;
+        }
+        
+        .category-btn[data-category="history"].selected {
+            border-left: 6px solid #45b7d1 !important;
+        }
+        
+        .category-btn[data-category="science"].selected {
+            border-left: 6px solid #96ceb4 !important;
+        }
+        
+        .category-btn[data-category="sports"].selected {
+            border-left: 6px solid #feca57 !important;
+        }
+        
+        .category-btn[data-category="entertainment"].selected {
+            border-left: 6px solid #ff9ff3 !important;
         }
         
         .dialog-btn {
@@ -1895,8 +1928,30 @@ function showCategorySelectionDialog() {
         }
         
         .dialog-btn:hover {
-            opacity: 0.9;
-            transform: translateY(-1px);
+            opacity: 0.9 !important;
+            transform: translateY(-1px) !important;
+        }
+        
+        /* 選択状態の視覚的インジケーター */
+        .category-btn.selected::after {
+            content: "✓" !important;
+            position: absolute !important;
+            top: -5px !important;
+            right: -5px !important;
+            background: #28a745 !important;
+            color: white !important;
+            border-radius: 50% !important;
+            width: 20px !important;
+            height: 20px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            font-size: 12px !important;
+            font-weight: bold !important;
+        }
+        
+        .category-btn {
+            position: relative !important;
         }
     `;
     document.head.appendChild(style);
@@ -1960,12 +2015,47 @@ function toggleDialogCategory(category) {
         // 選択状態にする
         selectedOnlineCategories.push(category);
         button.classList.add('selected');
+        
+        // 強制的なスタイル適用も追加
+        button.style.setProperty('background', '#764ba2', 'important');
+        button.style.setProperty('color', 'white', 'important');
+        button.style.setProperty('transform', 'scale(1.05)', 'important');
+        
         console.log('選択:', category, selectedOnlineCategories);
     } else {
         // 選択解除
         selectedOnlineCategories.splice(index, 1);
         button.classList.remove('selected');
+        
+        // 強制的なスタイル適用も追加
+        button.style.setProperty('background', '#f0f0f0', 'important');
+        button.style.setProperty('color', '#333', 'important');
+        button.style.setProperty('transform', 'scale(1)', 'important');
+        
         console.log('解除:', category, selectedOnlineCategories);
+    }
+    
+    // 選択状態をビジュアルで確認できるようにテキストも変更
+    updateCategoryButtonText(button, category, index === -1);
+}
+
+function updateCategoryButtonText(button, category, isSelected) {
+    const categories = {
+        'general': '一般常識',
+        'geography': '地理',
+        'history': '歴史',
+        'science': '科学',
+        'sports': 'スポーツ',
+        'entertainment': 'エンタメ'
+    };
+    
+    const baseName = categories[category];
+    if (isSelected) {
+        button.innerHTML = `${baseName} ✓`;
+        button.setAttribute('title', '選択中 - クリックで解除');
+    } else {
+        button.innerHTML = baseName;
+        button.setAttribute('title', 'クリックで選択');
     }
 }
 
@@ -1975,6 +2065,12 @@ function selectAllCategories() {
     
     document.querySelectorAll('.category-btn').forEach(btn => {
         btn.classList.add('selected');
+        btn.style.setProperty('background', '#764ba2', 'important');
+        btn.style.setProperty('color', 'white', 'important');
+        btn.style.setProperty('transform', 'scale(1.05)', 'important');
+        
+        const category = btn.getAttribute('data-category');
+        updateCategoryButtonText(btn, category, true);
     });
     
     console.log('全選択後:', selectedOnlineCategories);
@@ -1986,6 +2082,12 @@ function clearAllCategories() {
     
     document.querySelectorAll('.category-btn').forEach(btn => {
         btn.classList.remove('selected');
+        btn.style.setProperty('background', '#f0f0f0', 'important');
+        btn.style.setProperty('color', '#333', 'important');
+        btn.style.setProperty('transform', 'scale(1)', 'important');
+        
+        const category = btn.getAttribute('data-category');
+        updateCategoryButtonText(btn, category, false);
     });
     
     console.log('全解除後:', selectedOnlineCategories);
