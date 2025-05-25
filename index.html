@@ -1103,6 +1103,10 @@ function handleWebSocketMessage(data) {
             showOnlineQuestion(data);
             break;
             
+        case 'timerUpdate':
+            updateOnlineTimer(data.timeLeft);
+            break;
+            
         case 'answerReceived':
             handleOnlineAnswerReceived(data);
             break;
@@ -1863,6 +1867,13 @@ function showOnlineQuestion(data) {
     gameState.currentAnswers = [];
     gameState.hasAnswered = false;
     
+    // サーバーから送られた時間を設定
+    if (data.timeLeft !== undefined) {
+        gameState.timeLeft = data.timeLeft;
+    } else {
+        gameState.timeLeft = 15;
+    }
+    
     // 必ずクイズ画面を表示
     showScreen('quizScreen');
     
@@ -1885,13 +1896,16 @@ function showOnlineQuestion(data) {
         answerList.innerHTML = '<h4>回答状況</h4>';
     }
     
-    // タイマー表示をリセット
-    const timerElement = document.getElementById('timer');
-    if (timerElement) {
-        timerElement.textContent = '15';
-    }
+    // タイマー表示を初期化
+    updateTimerDisplay();
     
     console.log(`問題${data.questionNumber}を表示しました`);
+}
+
+// オンライン用タイマー更新
+function updateOnlineTimer(timeLeft) {
+    gameState.timeLeft = timeLeft;
+    updateTimerDisplay();
 }
 
 function handleOnlineAnswerReceived(data) {
