@@ -981,7 +981,7 @@ function initWebSocket() {
     // 本番環境とローカル環境を自動判定
     const isProduction = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const host = isProduction ? window.location.host : 'localhost:8080';
+    const host = isProduction ? window.location.host : 'localhost:10000';
     const wsUrl = `${protocol}//${host}`;
     
     console.log('WebSocket接続先:', wsUrl);
