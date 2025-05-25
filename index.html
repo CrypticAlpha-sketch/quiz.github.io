@@ -128,7 +128,7 @@
         /* タイトル - 参考サイト風のスタイル */
         h1 {
             font-size: clamp(2.5rem, 8vw, 5rem);
-            font-weight: 200;
+            font-weight: 600; /* 200から600に変更 */
             text-align: center;
             line-height: 0.9;
             margin-bottom: 3rem;
@@ -286,13 +286,14 @@
 
         .btn-primary {
             background: var(--accent-primary);
-            color: var(--text-light);
+            color: var(--bg-primary); /* 白背景なら黒文字、黒背景なら白文字になる */
             border-color: var(--accent-primary);
         }
-
+        
         .btn-primary:hover {
             background: var(--accent-secondary);
             border-color: var(--accent-secondary);
+            color: var(--bg-primary); /* ホバー時も同様 */
         }
 
         .btn-success {
