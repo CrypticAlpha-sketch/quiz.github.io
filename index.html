@@ -492,6 +492,7 @@
             cursor: pointer;
             transition: var(--transition);
             text-align: center;
+            color: #2c3e50;
             font-size: 1.1rem;
             font-weight: 500;
             position: relative;
@@ -732,7 +733,9 @@
         .player-item.ready,
         .online-player.ready {
             border-left-color: #4facfe;
-            background: linear-gradient(135deg, rgba(79, 172, 254, 0.1) 0%, rgba(0, 242, 254, 0.1) 100%);
+            background: linear-gradient(135deg, rgba(79, 172, 254, 0.15) 0%, rgba(0, 242, 254, 0.15) 100%);
+            color: #2c3e50; /* テキスト色を濃く */
+            border: 2px solid rgba(79, 172, 254, 0.3); /* 全体に薄い枠線を追加 */
         }
 
         /* ルーム情報 */
@@ -795,6 +798,10 @@
         .online-player.ready .ready-status {
             color: #0891b2;
             font-weight: 700;
+            background: rgba(8, 145, 178, 0.1); /* 背景を追加 */
+            padding: 0.3rem 0.8rem; /* パディングを追加 */
+            border-radius: 15px; /* 角丸にして見やすく */
+            font-size: 0.85rem;
         }
 
         /* センター配置 */
