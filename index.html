@@ -1836,9 +1836,9 @@ function showCategorySelectionDialog() {
         { key: 'entertainment', name: 'エンタメ' }
     ];
     
-    // 直接HTMLに埋め込むスタイルでより確実に適用
+    // 各カテゴリーに個別IDを付与
     const categoryButtons = categories.map(cat => 
-        `<button class="category-btn" data-category="${cat.key}" 
+        `<button id="category-${cat.key}" class="category-btn" data-category="${cat.key}" 
                  style="
                     padding: 12px 20px;
                     margin: 5px;
@@ -1875,12 +1875,15 @@ function showCategorySelectionDialog() {
     
     document.body.appendChild(dialog);
     
-    // イベントリスナーを追加
-    document.querySelectorAll('.category-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const category = this.getAttribute('data-category');
-            toggleDialogCategory(category);
-        });
+    // 各カテゴリーボタンに個別にイベントリスナーを追加
+    categories.forEach(cat => {
+        const button = document.getElementById(`category-${cat.key}`);
+        if (button) {
+            button.addEventListener('click', function() {
+                console.log(`${cat.key}ボタンがクリックされました`);
+                toggleDialogCategoryById(cat.key);
+            });
+        }
     });
     
     document.getElementById('selectAllBtn').addEventListener('click', selectAllCategories);
@@ -1896,22 +1899,34 @@ function showCategorySelectionDialog() {
 
 let selectedOnlineCategories = [];
 
-function toggleDialogCategory(category) {
-    console.log('カテゴリー切り替え:', category);
+// ID指定での個別カテゴリー切り替え関数
+function toggleDialogCategoryById(category) {
+    console.log('ID指定でカテゴリー切り替え:', category);
     
-    const button = document.querySelector(`[data-category="${category}"]`);
+    const button = document.getElementById(`category-${category}`);
     if (!button) {
-        console.error('ボタンが見つかりません:', category);
+        console.error('ボタンが見つかりません（ID指定）:', `category-${category}`);
         return;
     }
     
     const index = selectedOnlineCategories.indexOf(category);
     
+    const categories = {
+        'general': '一般常識',
+        'geography': '地理', 
+        'history': '歴史',
+        'science': '科学',
+        'sports': 'スポーツ',
+        'entertainment': 'エンタメ'
+    };
+    
     if (index === -1) {
         // 選択状態にする
         selectedOnlineCategories.push(category);
         
-        // 直接スタイルを完全に書き換え
+        console.log(`${category}を選択状態に変更`);
+        
+        // 選択時のスタイル
         button.style.cssText = `
             padding: 12px 20px;
             margin: 5px;
@@ -1930,23 +1945,16 @@ function toggleDialogCategory(category) {
             box-shadow: 0 4px 12px rgba(118, 75, 162, 0.4);
         `;
         
-        // テキストも変更
-        const categories = {
-            'general': '一般常識',
-            'geography': '地理', 
-            'history': '歴史',
-            'science': '科学',
-            'sports': 'スポーツ',
-            'entertainment': 'エンタメ'
-        };
         button.innerHTML = `✓ ${categories[category]}`;
         
-        console.log('選択:', category, selectedOnlineCategories);
+        console.log('選択完了:', category, selectedOnlineCategories);
     } else {
         // 選択解除
         selectedOnlineCategories.splice(index, 1);
         
-        // 元のスタイルに戻す
+        console.log(`${category}を非選択状態に変更`);
+        
+        // 非選択時のスタイル
         button.style.cssText = `
             padding: 12px 20px;
             margin: 5px;
@@ -1965,19 +1973,15 @@ function toggleDialogCategory(category) {
             box-shadow: none;
         `;
         
-        // テキストも戻す
-        const categories = {
-            'general': '一般常識',
-            'geography': '地理',
-            'history': '歴史', 
-            'science': '科学',
-            'sports': 'スポーツ',
-            'entertainment': 'エンタメ'
-        };
         button.innerHTML = categories[category];
         
-        console.log('解除:', category, selectedOnlineCategories);
+        console.log('解除完了:', category, selectedOnlineCategories);
     }
+}
+
+// 既存の関数も残しておく（後方互換性のため）
+function toggleDialogCategory(category) {
+    toggleDialogCategoryById(category);
 }
 
 function selectAllCategories() {
@@ -1993,29 +1997,32 @@ function selectAllCategories() {
         'entertainment': 'エンタメ'
     };
     
-    document.querySelectorAll('.category-btn').forEach(btn => {
-        const category = btn.getAttribute('data-category');
-        
-        // 完全にスタイルを書き換え
-        btn.style.cssText = `
-            padding: 12px 20px;
-            margin: 5px;
-            border: 3px solid #764ba2;
-            border-radius: 8px;
-            background: #764ba2;
-            color: white;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 14px;
-            transition: all 0.3s ease;
-            position: relative;
-            min-width: 120px;
-            text-align: center;
-            transform: scale(1.1);
-            box-shadow: 0 4px 12px rgba(118, 75, 162, 0.4);
-        `;
-        
-        btn.innerHTML = `✓ ${categories[category]}`;
+    // 各カテゴリーをIDで個別に処理
+    selectedOnlineCategories.forEach(category => {
+        const button = document.getElementById(`category-${category}`);
+        if (button) {
+            console.log(`全選択: ${category}ボタンを選択状態に`);
+            
+            button.style.cssText = `
+                padding: 12px 20px;
+                margin: 5px;
+                border: 3px solid #764ba2;
+                border-radius: 8px;
+                background: #764ba2;
+                color: white;
+                cursor: pointer;
+                font-weight: bold;
+                font-size: 14px;
+                transition: all 0.3s ease;
+                position: relative;
+                min-width: 120px;
+                text-align: center;
+                transform: scale(1.1);
+                box-shadow: 0 4px 12px rgba(118, 75, 162, 0.4);
+            `;
+            
+            button.innerHTML = `✓ ${categories[category]}`;
+        }
     });
     
     console.log('全選択後:', selectedOnlineCategories);
@@ -2023,7 +2030,6 @@ function selectAllCategories() {
 
 function clearAllCategories() {
     console.log('全て解除');
-    selectedOnlineCategories = [];
     
     const categories = {
         'general': '一般常識',
@@ -2034,29 +2040,35 @@ function clearAllCategories() {
         'entertainment': 'エンタメ'
     };
     
-    document.querySelectorAll('.category-btn').forEach(btn => {
-        const category = btn.getAttribute('data-category');
-        
-        // 元のスタイルに戻す
-        btn.style.cssText = `
-            padding: 12px 20px;
-            margin: 5px;
-            border: 3px solid #764ba2;
-            border-radius: 8px;
-            background: #f0f0f0;
-            color: #333;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 14px;
-            transition: all 0.3s ease;
-            position: relative;
-            min-width: 120px;
-            text-align: center;
-            transform: scale(1);
-            box-shadow: none;
-        `;
-        
-        btn.innerHTML = categories[category];
+    // 現在選択されているカテゴリーを個別に解除
+    const currentSelected = [...selectedOnlineCategories]; // コピーを作成
+    selectedOnlineCategories = [];
+    
+    currentSelected.forEach(category => {
+        const button = document.getElementById(`category-${category}`);
+        if (button) {
+            console.log(`全解除: ${category}ボタンを非選択状態に`);
+            
+            button.style.cssText = `
+                padding: 12px 20px;
+                margin: 5px;
+                border: 3px solid #764ba2;
+                border-radius: 8px;
+                background: #f0f0f0;
+                color: #333;
+                cursor: pointer;
+                font-weight: bold;
+                font-size: 14px;
+                transition: all 0.3s ease;
+                position: relative;
+                min-width: 120px;
+                text-align: center;
+                transform: scale(1);
+                box-shadow: none;
+            `;
+            
+            button.innerHTML = categories[category];
+        }
     });
     
     console.log('全解除後:', selectedOnlineCategories);
