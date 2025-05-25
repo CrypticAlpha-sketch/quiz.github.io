@@ -1836,11 +1836,73 @@ function showCategorySelectionDialog() {
         { key: 'entertainment', name: 'エンタメ' }
     ];
     
+    // CSSスタイルを先に追加
+    const style = document.createElement('style');
+    style.id = 'categoryDialogStyles';
+    style.textContent = `
+        .category-btn {
+            padding: 12px 20px !important;
+            margin: 5px !important;
+            border: 2px solid #764ba2 !important;
+            border-radius: 8px !important;
+            background: #f0f0f0 !important;
+            color: #333 !important;
+            cursor: pointer !important;
+            font-weight: bold !important;
+            transition: all 0.3s ease !important;
+            font-size: 14px !important;
+        }
+        
+        .category-btn.selected {
+            background: #764ba2 !important;
+            color: white !important;
+            border-color: #764ba2 !important;
+        }
+        
+        .category-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .dialog-btn {
+            margin: 5px !important;
+            padding: 10px 20px !important;
+            border: none !important;
+            border-radius: 5px !important;
+            cursor: pointer !important;
+            font-weight: bold !important;
+        }
+        
+        .dialog-btn.primary {
+            background: #764ba2 !important;
+            color: white !important;
+            padding: 12px 24px !important;
+        }
+        
+        .dialog-btn.success {
+            background: #28a745 !important;
+            color: white !important;
+        }
+        
+        .dialog-btn.secondary {
+            background: #6c757d !important;
+            color: white !important;
+        }
+        
+        .dialog-btn.danger {
+            background: #dc3545 !important;
+            color: white !important;
+        }
+        
+        .dialog-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+    `;
+    document.head.appendChild(style);
+    
     const categoryButtons = categories.map(cat => 
-        `<button class="category-btn" data-category="${cat.key}" onclick="toggleDialogCategory('${cat.key}')" 
-         style="padding: 12px 20px; margin: 5px; border: 2px solid #764ba2; border-radius: 8px; 
-                background: #f0f0f0; color: #333; cursor: pointer; font-weight: bold; 
-                transition: all 0.3s ease; font-size: 14px;">${cat.name}</button>`
+        `<button class="category-btn" data-category="${cat.key}">${cat.name}</button>`
     ).join('');
     
     dialog.innerHTML = `
@@ -1850,35 +1912,30 @@ function showCategorySelectionDialog() {
                 ${categoryButtons}
             </div>
             <div style="margin-bottom: 20px;">
-                <button class="btn" onclick="selectAllCategories()" 
-                        style="margin: 5px; padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer;">全て選択</button>
-                <button class="btn" onclick="clearAllCategories()"
-                        style="margin: 5px; padding: 10px 20px; background: #6c757d; color: white; border: none; border-radius: 5px; cursor: pointer;">全て解除</button>
+                <button class="dialog-btn success" id="selectAllBtn">全て選択</button>
+                <button class="dialog-btn secondary" id="clearAllBtn">全て解除</button>
             </div>
             <div>
-                <button class="btn btn-primary" onclick="startGameWithSelectedCategories()"
-                        style="margin: 5px; padding: 12px 24px; background: #764ba2; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">ゲーム開始</button>
-                <button class="btn btn-danger" onclick="closeCategoryDialog()"
-                        style="margin: 5px; padding: 12px 24px; background: #dc3545; color: white; border: none; border-radius: 5px; cursor: pointer;">キャンセル</button>
+                <button class="dialog-btn primary" id="startGameBtn">ゲーム開始</button>
+                <button class="dialog-btn danger" id="cancelBtn">キャンセル</button>
             </div>
         </div>
     `;
     
     document.body.appendChild(dialog);
     
-    // CSSホバー効果を追加
-    const style = document.createElement('style');
-    style.textContent = `
-        .category-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        }
-        .btn:hover {
-            opacity: 0.9;
-            transform: translateY(-1px);
-        }
-    `;
-    document.head.appendChild(style);
+    // イベントリスナーを追加
+    document.querySelectorAll('.category-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const category = this.getAttribute('data-category');
+            toggleDialogCategory(category);
+        });
+    });
+    
+    document.getElementById('selectAllBtn').addEventListener('click', selectAllCategories);
+    document.getElementById('clearAllBtn').addEventListener('click', clearAllCategories);
+    document.getElementById('startGameBtn').addEventListener('click', startGameWithSelectedCategories);
+    document.getElementById('cancelBtn').addEventListener('click', closeCategoryDialog);
     
     // デフォルトで全カテゴリを選択
     setTimeout(() => {
@@ -1902,16 +1959,12 @@ function toggleDialogCategory(category) {
     if (index === -1) {
         // 選択状態にする
         selectedOnlineCategories.push(category);
-        button.style.background = '#764ba2';
-        button.style.color = 'white';
-        button.style.borderColor = '#764ba2';
+        button.classList.add('selected');
         console.log('選択:', category, selectedOnlineCategories);
     } else {
         // 選択解除
         selectedOnlineCategories.splice(index, 1);
-        button.style.background = '#f0f0f0';
-        button.style.color = '#333';
-        button.style.borderColor = '#764ba2';
+        button.classList.remove('selected');
         console.log('解除:', category, selectedOnlineCategories);
     }
 }
@@ -1921,9 +1974,7 @@ function selectAllCategories() {
     selectedOnlineCategories = ['general', 'geography', 'history', 'science', 'sports', 'entertainment'];
     
     document.querySelectorAll('.category-btn').forEach(btn => {
-        btn.style.background = '#764ba2';
-        btn.style.color = 'white';
-        btn.style.borderColor = '#764ba2';
+        btn.classList.add('selected');
     });
     
     console.log('全選択後:', selectedOnlineCategories);
@@ -1934,9 +1985,7 @@ function clearAllCategories() {
     selectedOnlineCategories = [];
     
     document.querySelectorAll('.category-btn').forEach(btn => {
-        btn.style.background = '#f0f0f0';
-        btn.style.color = '#333';
-        btn.style.borderColor = '#764ba2';
+        btn.classList.remove('selected');
     });
     
     console.log('全解除後:', selectedOnlineCategories);
@@ -1970,12 +2019,10 @@ function closeCategoryDialog() {
     }
     
     // 追加したスタイルも削除
-    const addedStyles = document.querySelectorAll('style');
-    addedStyles.forEach(style => {
-        if (style.textContent.includes('.category-btn:hover')) {
-            style.remove();
-        }
-    });
+    const addedStyles = document.getElementById('categoryDialogStyles');
+    if (addedStyles) {
+        addedStyles.remove();
+    }
     
     selectedOnlineCategories = [];
 }
