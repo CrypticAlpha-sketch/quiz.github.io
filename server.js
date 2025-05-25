@@ -28,45 +28,230 @@ const wss = new WebSocket.Server({
 const rooms = new Map();
 const players = new Map();
 
-// デフォルトの問題セット
-const defaultQuestions = [
-    {
-        question: "日本の首都はどこですか？",
-        choices: ["大阪", "東京", "京都"],
-        correct: 1,
-        category: "general"
-    },
-    {
-        question: "富士山の高さは？",
-        choices: ["3,776m", "3,676m", "3,876m"],
-        correct: 0,
-        category: "geography"
-    },
-    {
-        question: "鎌倉幕府を開いたのは誰？",
-        choices: ["源頼朝", "足利尊氏", "徳川家康"],
-        correct: 0,
-        category: "history"
-    },
-    {
-        question: "水の化学式は？",
-        choices: ["CO2", "H2O", "O2"],
-        correct: 1,
-        category: "science"
-    },
-    {
-        question: "東京オリンピック2020の開催年は？",
-        choices: ["2020年", "2021年", "2022年"],
-        correct: 1,
-        category: "sports"
-    },
-    {
-        question: "ジブリ作品「千と千尋の神隠し」の監督は？",
-        choices: ["宮崎駿", "高畑勲", "細田守"],
-        correct: 0,
-        category: "entertainment"
+// デフォルトの問題セット（大幅に拡張）
+const defaultQuestions = {
+    general: [
+        {
+            question: "日本の首都はどこですか？",
+            choices: ["大阪", "東京", "京都"],
+            correct: 1,
+            category: "general"
+        },
+        {
+            question: "日本の通貨単位は？",
+            choices: ["ウォン", "元", "円"],
+            correct: 2,
+            category: "general"
+        },
+        {
+            question: "日本の国花は？",
+            choices: ["桜", "菊", "梅"],
+            correct: 0,
+            category: "general"
+        },
+        {
+            question: "日本の人口は約何人？",
+            choices: ["1億人", "1億2000万人", "1億5000万人"],
+            correct: 1,
+            category: "general"
+        },
+        {
+            question: "日本の面積は世界第何位？",
+            choices: ["60位", "61位", "62位"],
+            correct: 1,
+            category: "general"
+        }
+    ],
+    geography: [
+        {
+            question: "富士山の高さは？",
+            choices: ["3,776m", "3,676m", "3,876m"],
+            correct: 0,
+            category: "geography"
+        },
+        {
+            question: "日本で一番大きな湖は？",
+            choices: ["霞ヶ浦", "琵琶湖", "洞爺湖"],
+            correct: 1,
+            category: "geography"
+        },
+        {
+            question: "日本で一番長い川は？",
+            choices: ["利根川", "信濃川", "石狩川"],
+            correct: 1,
+            category: "geography"
+        },
+        {
+            question: "日本最北端の都道府県は？",
+            choices: ["青森県", "北海道", "岩手県"],
+            correct: 1,
+            category: "geography"
+        },
+        {
+            question: "日本最大の島は？",
+            choices: ["北海道", "本州", "九州"],
+            correct: 1,
+            category: "geography"
+        }
+    ],
+    history: [
+        {
+            question: "鎌倉幕府を開いたのは誰？",
+            choices: ["源頼朝", "足利尊氏", "徳川家康"],
+            correct: 0,
+            category: "history"
+        },
+        {
+            question: "明治維新は何年？",
+            choices: ["1868年", "1858年", "1878年"],
+            correct: 0,
+            category: "history"
+        },
+        {
+            question: "第二次世界大戦が終わった年は？",
+            choices: ["1944年", "1945年", "1946年"],
+            correct: 1,
+            category: "history"
+        },
+        {
+            question: "江戸幕府を開いたのは誰？",
+            choices: ["徳川家康", "徳川秀忠", "徳川家光"],
+            correct: 0,
+            category: "history"
+        },
+        {
+            question: "平安時代の都は？",
+            choices: ["奈良", "京都", "鎌倉"],
+            correct: 1,
+            category: "history"
+        }
+    ],
+    science: [
+        {
+            question: "水の化学式は？",
+            choices: ["CO2", "H2O", "O2"],
+            correct: 1,
+            category: "science"
+        },
+        {
+            question: "光の速度は約？",
+            choices: ["30万km/秒", "3万km/秒", "300万km/秒"],
+            correct: 0,
+            category: "science"
+        },
+        {
+            question: "地球から太陽までの距離は約？",
+            choices: ["1億5000万km", "1000万km", "10億km"],
+            correct: 0,
+            category: "science"
+        },
+        {
+            question: "酸素の化学記号は？",
+            choices: ["O", "O2", "Ox"],
+            correct: 0,
+            category: "science"
+        },
+        {
+            question: "重力加速度は約？",
+            choices: ["9.8m/s²", "8.9m/s²", "10.2m/s²"],
+            correct: 0,
+            category: "science"
+        }
+    ],
+    sports: [
+        {
+            question: "東京オリンピック2020の開催年は？",
+            choices: ["2020年", "2021年", "2022年"],
+            correct: 1,
+            category: "sports"
+        },
+        {
+            question: "サッカーのワールドカップは何年ごと？",
+            choices: ["2年", "3年", "4年"],
+            correct: 2,
+            category: "sports"
+        },
+        {
+            question: "野球で1イニングに投手が投げる最少球数は？",
+            choices: ["3球", "6球", "9球"],
+            correct: 0,
+            category: "sports"
+        },
+        {
+            question: "バスケットボールのゴールの高さは？",
+            choices: ["3.05m", "3.15m", "3.25m"],
+            correct: 0,
+            category: "sports"
+        },
+        {
+            question: "テニスの4大大会でないのは？",
+            choices: ["ウィンブルドン", "全仏オープン", "マスターズ"],
+            correct: 2,
+            category: "sports"
+        }
+    ],
+    entertainment: [
+        {
+            question: "ジブリ作品「千と千尋の神隠し」の監督は？",
+            choices: ["宮崎駿", "高畑勲", "細田守"],
+            correct: 0,
+            category: "entertainment"
+        },
+        {
+            question: "「鬼滅の刃」の主人公の名前は？",
+            choices: ["竈門炭治郎", "我妻善逸", "嘴平伊之助"],
+            correct: 0,
+            category: "entertainment"
+        },
+        {
+            question: "ポケモンの最初の御三家は？",
+            choices: ["フシギダネ・ヒトカゲ・ゼニガメ", "チコリータ・ヒノアラシ・ワニノコ", "キモリ・アチャモ・ミズゴロウ"],
+            correct: 0,
+            category: "entertainment"
+        },
+        {
+            question: "「ワンピース」の主人公は？",
+            choices: ["ルフィ", "ゾロ", "サンジ"],
+            correct: 0,
+            category: "entertainment"
+        },
+        {
+            question: "「となりのトトロ」に登場するキャラクターは？",
+            choices: ["ネコバス", "魔女の宅急便", "ハウル"],
+            correct: 0,
+            category: "entertainment"
+        }
+    ]
+};
+
+// 問題プールから問題を選択
+function selectQuestions(categories = null, count = 6) {
+    let allQuestions = [];
+    
+    // カテゴリが指定されていない場合は全カテゴリから選択
+    const selectedCategories = categories || Object.keys(defaultQuestions);
+    
+    // 指定されたカテゴリから問題を収集
+    selectedCategories.forEach(category => {
+        if (defaultQuestions[category]) {
+            allQuestions = allQuestions.concat(defaultQuestions[category]);
+        }
+    });
+    
+    // 問題が不足している場合は全カテゴリから補完
+    if (allQuestions.length < count) {
+        Object.values(defaultQuestions).forEach(categoryQuestions => {
+            allQuestions = allQuestions.concat(categoryQuestions);
+        });
     }
-];
+    
+    // 重複を除去してシャッフル
+    const uniqueQuestions = allQuestions.filter((question, index, self) => 
+        index === self.findIndex(q => q.question === question.question)
+    );
+    
+    return shuffleArray(uniqueQuestions).slice(0, count);
+}
 
 // ルーム作成
 function createRoom(hostPlayer) {
@@ -334,13 +519,29 @@ function handleStartGame(ws, data) {
         return;
     }
     
-    // カスタム問題がある場合はそれを使用、なければデフォルト問題
-    let questions = data.questions && data.questions.length > 0 ? data.questions : defaultQuestions;
-    room.questions = shuffleArray(questions).slice(0, 6);
+    // 問題の選択ロジックを改善
+    let questions;
+    
+    if (data.questions && data.questions.length >= 6) {
+        // クライアントから送られたカスタム問題がある場合
+        console.log('カスタム問題を使用:', data.questions.length + '問');
+        questions = shuffleArray(data.questions).slice(0, 6);
+    } else if (data.categories && data.categories.length > 0) {
+        // カテゴリが指定されている場合
+        console.log('指定カテゴリから問題選択:', data.categories);
+        questions = selectQuestions(data.categories, 6);
+    } else {
+        // デフォルト: 全カテゴリからランダム選択
+        console.log('全カテゴリから問題選択');
+        questions = selectQuestions(null, 6);
+    }
+    
+    room.questions = questions;
     room.gameState = 'playing';
     room.currentQuestion = 0;
     
     console.log(`ゲーム開始 - ルーム${room.id}, ${room.questions.length}問`);
+    console.log('選択された問題:', room.questions.map(q => q.question));
     
     broadcastToRoom(room.id, {
         type: 'gameStart',
