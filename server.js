@@ -331,9 +331,12 @@ function sendQuestion(room) {
         question: room.questions[room.currentQuestion]
     });
     
+    // タイマーを少し長めに設定（18秒）
     setTimeout(() => {
-        nextQuestion(room);
-    }, 15000);
+        if (room.gameState === 'playing') { // ゲーム中のみ次の問題へ
+            nextQuestion(room);
+        }
+    }, 18000);
 }
 
 // 回答処理
