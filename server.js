@@ -80,7 +80,9 @@ function createRoom(hostPlayer) {
         questions: [],
         scores: {},
         answers: [],
-        questionTimer: null
+        questionTimer: null,
+        countdownTimer: null,
+        timeLeft: 15
     };
     
     rooms.set(roomId, room);
@@ -360,23 +362,45 @@ function sendQuestion(room) {
     console.log(`問題${room.currentQuestion + 1}を送信 - ルーム${room.id}`);
     
     room.answers = [];
+    room.timeLeft = 15; // タイマー初期化
     
     broadcastToRoom(room.id, {
         type: 'newQuestion',
         questionNumber: room.currentQuestion + 1,
         totalQuestions: room.questions.length,
-        question: room.questions[room.currentQuestion]
+        question: room.questions[room.currentQuestion],
+        timeLeft: room.timeLeft
     });
     
     // 問題のタイマーをクリア
     if (room.questionTimer) {
         clearTimeout(room.questionTimer);
     }
+    if (room.countdownTimer) {
+        clearInterval(room.countdownTimer);
+    }
     
-    // 20秒後に次の問題または結果表示
-    room.questionTimer = setTimeout(() => {
-        if (room.gameState === 'playing') {
+    // カウントダウンタイマー開始
+    room.countdownTimer = setInterval(() => {
+        room.timeLeft--;
+        
+        // 残り時間を全員に送信
+        broadcastToRoom(room.id, {
+            type: 'timerUpdate',
+            timeLeft: room.timeLeft
+        });
+        
+        if (room.timeLeft <= 0) {
+            clearInterval(room.countdownTimer);
             console.log(`問題${room.currentQuestion + 1}の時間切れ - ルーム${room.id}`);
+            endQuestion(room);
+        }
+    }, 1000);
+    
+    // 20秒後のフェイルセーフ
+    room.questionTimer = setTimeout(() => {
+        if (room.gameState === 'playing' && room.timeLeft > 0) {
+            console.log(`問題${room.currentQuestion + 1}のフェイルセーフ発動 - ルーム${room.id}`);
             endQuestion(room);
         }
     }, 20000);
@@ -412,7 +436,7 @@ function handleSelectAnswer(ws, data) {
         playerName: player.name,
         answerIndex: data.answerIndex,
         correct: isCorrect,
-        timeLeft: data.timeLeft || 15,
+        timeLeft: room.timeLeft, // サーバーサイドの時間を使用
         timestamp: Date.now()
     };
     
@@ -439,7 +463,7 @@ function handleSelectAnswer(ws, data) {
         playerId: data.playerId,
         playerName: player.name,
         answerIndex: data.answerIndex,
-        timeLeft: data.timeLeft || 15,
+        timeLeft: room.timeLeft,
         answerOrder: room.answers.length
     });
     
@@ -448,6 +472,9 @@ function handleSelectAnswer(ws, data) {
         console.log('全員回答完了 - 問題終了');
         if (room.questionTimer) {
             clearTimeout(room.questionTimer);
+        }
+        if (room.countdownTimer) {
+            clearInterval(room.countdownTimer);
         }
         setTimeout(() => {
             endQuestion(room);
@@ -458,6 +485,16 @@ function handleSelectAnswer(ws, data) {
 // 問題終了処理
 function endQuestion(room) {
     console.log(`問題${room.currentQuestion + 1}終了 - ルーム${room.id}`);
+    
+    // タイマーをクリア
+    if (room.countdownTimer) {
+        clearInterval(room.countdownTimer);
+        room.countdownTimer = null;
+    }
+    if (room.questionTimer) {
+        clearTimeout(room.questionTimer);
+        room.questionTimer = null;
+    }
     
     const question = room.questions[room.currentQuestion];
     
@@ -569,6 +606,9 @@ function handleDisconnect(ws) {
                 if (room.questionTimer) {
                     clearTimeout(room.questionTimer);
                 }
+                if (room.countdownTimer) {
+                    clearInterval(room.countdownTimer);
+                }
                 rooms.delete(roomId);
                 console.log(`ルーム削除: ${roomId}`);
             } else {
@@ -615,6 +655,9 @@ function handleLeaveRoom(ws, data) {
             if (room.players.length === 0) {
                 if (room.questionTimer) {
                     clearTimeout(room.questionTimer);
+                }
+                if (room.countdownTimer) {
+                    clearInterval(room.countdownTimer);
                 }
                 rooms.delete(roomId);
                 console.log(`ルーム削除: ${roomId}`);
