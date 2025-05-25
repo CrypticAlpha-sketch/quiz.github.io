@@ -976,9 +976,15 @@ const defaultQuestions = {
     ]
 };
 
-// WebSocket接続管理
+// WebSocket接続管理（URL自動判定版）
 function initWebSocket() {
-    const wsUrl = 'ws://localhost:8080';
+    // 本番環境とローカル環境を自動判定
+    const isProduction = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const host = isProduction ? window.location.host : 'localhost:8080';
+    const wsUrl = `${protocol}//${host}`;
+    
+    console.log('WebSocket接続先:', wsUrl);
     
     try {
         gameState.onlineState.ws = new WebSocket(wsUrl);
