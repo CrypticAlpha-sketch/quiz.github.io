@@ -366,17 +366,19 @@
             cursor: pointer;
             transition: var(--transition);
             position: relative;
+            color: var(--text-muted); /* 非選択時は薄いグレー */
         }
-
+        
         .category-item:hover {
             transform: translateY(-2px);
             border-color: var(--accent-primary);
             box-shadow: var(--shadow-medium);
+            color: var(--text-primary); /* ホバー時は濃い色に */
         }
-
+        
         .category-item.selected {
             background: var(--accent-primary);
-            color: var(--text-light);
+            color: var(--text-light); /* 選択時は白文字 */
             border-color: var(--accent-primary);
             transform: translateY(-2px);
             box-shadow: var(--shadow-medium);
@@ -633,6 +635,28 @@
             align-items: center;
             border: 1px solid var(--border-light);
             transition: var(--transition);
+            color: var(--text-primary); /* 文字色を追加 */
+        }
+        
+        .rank-1 {
+            background: #fef3c7;
+            border-color: #f59e0b;
+            font-weight: 600;
+            color: #92400e; /* 茶色系の濃い文字色 */
+        }
+        
+        .rank-2 {
+            background: #f3f4f6;
+            border-color: #9ca3af;
+            font-weight: 500;
+            color: #374151; /* 濃いグレー */
+        }
+        
+        .rank-3 {
+            background: #fef2e2;
+            border-color: #f97316;
+            font-weight: 500;
+            color: #c2410c; /* オレンジ系の濃い文字色 */
         }
 
         .rank-item:hover {
@@ -640,23 +664,6 @@
             box-shadow: var(--shadow-medium);
         }
 
-        .rank-1 {
-            background: #fef3c7;
-            border-color: #f59e0b;
-            font-weight: 600;
-        }
-
-        .rank-2 {
-            background: #f3f4f6;
-            border-color: #9ca3af;
-            font-weight: 500;
-        }
-
-        .rank-3 {
-            background: #fef2e2;
-            border-color: #f97316;
-            font-weight: 500;
-        }
 
         /* 問題作成 */
         .question-form {
