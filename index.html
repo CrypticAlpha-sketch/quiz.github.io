@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>早押しクイズバトル - プレミアムエディション</title>
+    <title>早押しクイズバトル</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
 
@@ -150,7 +150,7 @@
             font-family: 'Poppins', sans-serif;
             font-size: 1.4rem;
             font-weight: 600;
-            color: #2c3e50;
+            color: #ffffff;
             margin-bottom: 1rem;
         }
 
@@ -756,17 +756,17 @@
             border: 1px solid rgba(255, 255, 255, 0.3);
         }
 
-        .room-info {
-            background: var(--primary-gradient);
-            color: var(--text-primary);
-            padding: 1.5rem;
-            border-radius: var(--border-radius);
-            margin-bottom: 2rem;
-            text-align: center;
-            font-size: 1.3rem;
-            font-weight: 600;
-            box-shadow: var(--shadow-medium);
-        }
+            .room-info {
+                background: transparent; /* var(--primary-gradient)から変更 */
+                color: var(--text-primary);
+                padding: 1.5rem;
+                border-radius: var(--border-radius);
+                margin-bottom: 2rem;
+                text-align: center;
+                font-size: 1.3rem;
+                font-weight: 600;
+                box-shadow: none; /* var(--shadow-medium)から変更 */
+            }
 
         /* ラベル */
         .you-label,
@@ -796,12 +796,13 @@
 
         .player-item.ready .ready-status,
         .online-player.ready .ready-status {
-            color: #0891b2;
+            color: #ffffff; /* #0891b2から変更 */
             font-weight: 700;
-            background: rgba(8, 145, 178, 0.1); /* 背景を追加 */
-            padding: 0.3rem 0.8rem; /* パディングを追加 */
-            border-radius: 15px; /* 角丸にして見やすく */
+            background: rgba(79, 172, 254, 0.8); /* 0.1から0.8に変更して背景を濃く */
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
             font-size: 0.85rem;
+            border: 2px solid #4facfe; /* 枠線を追加 */
         }
 
         /* センター配置 */
