@@ -1396,34 +1396,423 @@ function removeQuestion(index) {
     }
 }
 
-// オンライン機能（WebSocketサーバーが必要）
+// WebSocket接続管理
+function initWebSocket() {
+    const isProduction = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+    
+    let wsUrl;
+    if (isProduction) {
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        wsUrl = `${protocol}//${window.location.host}`;
+    } else {
+        wsUrl = 'ws://localhost:8080';
+    }
+    
+    console.log('WebSocket接続先:', wsUrl);
+    
+    try {
+        gameState.onlineState.ws = new WebSocket(wsUrl);
+        
+        gameState.onlineState.ws.onopen = () => {
+            console.log('WebSocket接続成功');
+            updateConnectionStatus(true);
+        };
+        
+        gameState.onlineState.ws.onclose = () => {
+            console.log('WebSocket接続切断');
+            updateConnectionStatus(false);
+            // 再接続を試行
+            setTimeout(() => {
+                if (!gameState.onlineState.connected) {
+                    initWebSocket();
+                }
+            }, 3000);
+        };
+        
+        gameState.onlineState.ws.onmessage = (event) => {
+            handleWebSocketMessage(JSON.parse(event.data));
+        };
+        
+        gameState.onlineState.ws.onerror = (error) => {
+            console.error('WebSocketエラー:', error);
+            updateConnectionStatus(false);
+        };
+    } catch (error) {
+        console.error('WebSocket接続失敗:', error);
+        updateConnectionStatus(false);
+    }
+}
+
+function handleWebSocketMessage(data) {
+    console.log('受信:', data);
+    
+    switch(data.type) {
+        case 'roomCreated':
+            gameState.onlineState.roomId = data.roomId;
+            gameState.onlineState.playerId = data.playerId;
+            gameState.onlineState.isHost = true;
+            document.getElementById('roomIdDisplay').innerHTML = `
+                <div class="room-info">ルームID: ${data.roomId}</div>
+            `;
+            showScreen('onlineWaitingScreen');
+            updateOnlinePlayerList(data.players);
+            document.getElementById('startOnlineGameBtn').style.display = 'block';
+            break;
+            
+        case 'joinedRoom':
+            gameState.onlineState.roomId = data.roomId;
+            gameState.onlineState.playerId = data.playerId;
+            gameState.onlineState.isHost = false;
+            document.getElementById('roomIdDisplay').innerHTML = `
+                <div class="room-info">ルームID: ${data.roomId}</div>
+            `;
+            showScreen('onlineWaitingScreen');
+            updateOnlinePlayerList(data.players);
+            document.getElementById('startOnlineGameBtn').style.display = 'none';
+            break;
+            
+        case 'playerJoined':
+        case 'playerLeft':
+        case 'playerReady':
+            updateOnlinePlayerList(data.players);
+            if (data.type === 'playerLeft' && gameState.onlineState.isHost) {
+                document.getElementById('startOnlineGameBtn').style.display = 'block';
+            }
+            break;
+            
+        case 'newHost':
+            if (data.hostId === gameState.onlineState.playerId) {
+                gameState.onlineState.isHost = true;
+                document.getElementById('startOnlineGameBtn').style.display = 'block';
+            }
+            break;
+            
+        case 'gameStart':
+            startOnlineQuiz(data.questions);
+            break;
+            
+        case 'newQuestion':
+            showOnlineQuestion(data);
+            break;
+            
+        case 'answerReceived':
+            handleOnlineAnswerReceived(data);
+            break;
+            
+        case 'questionEnd':
+            handleOnlineQuestionEnd(data);
+            break;
+            
+        case 'gameEnd':
+            showOnlineResults(data.finalScores);
+            break;
+            
+        case 'error':
+            alert(data.message);
+            break;
+    }
+}
+
+// 接続状態更新
+function updateConnectionStatus(connected) {
+    gameState.onlineState.connected = connected;
+    const statusDiv = document.getElementById('connectionStatus');
+    if (statusDiv) {
+        statusDiv.textContent = connected ? '✅ サーバーに接続中' : '❌ サーバーに未接続';
+        statusDiv.className = connected ? 'connection-status connected' : 'connection-status disconnected';
+        statusDiv.style.display = 'block';
+    }
+}
+
+// ルーム作成
 function createRoom() {
-    alert('オンライン機能は現在開発中です');
+    const playerName = document.getElementById('onlinePlayerName').value.trim();
+    if (!playerName) {
+        alert('プレイヤー名を入力してください');
+        return;
+    }
+    
+    if (!gameState.onlineState.ws || gameState.onlineState.ws.readyState !== WebSocket.OPEN) {
+        alert('サーバーに接続されていません');
+        return;
+    }
+    
+    gameState.onlineState.ws.send(JSON.stringify({
+        type: 'createRoom',
+        playerName: playerName
+    }));
 }
 
 function showJoinRoom() {
     showScreen('joinRoomScreen');
 }
 
+// ルーム参加
 function joinRoom() {
-    alert('オンライン機能は現在開発中です');
+    const playerName = document.getElementById('onlinePlayerName').value.trim();
+    const roomId = document.getElementById('roomIdInput').value.trim().toUpperCase();
+    
+    if (!playerName) {
+        alert('プレイヤー名を入力してください');
+        return;
+    }
+    
+    if (!roomId) {
+        alert('ルームIDを入力してください');
+        return;
+    }
+    
+    if (!gameState.onlineState.ws || gameState.onlineState.ws.readyState !== WebSocket.OPEN) {
+        alert('サーバーに接続されていません');
+        return;
+    }
+    
+    gameState.onlineState.ws.send(JSON.stringify({
+        type: 'joinRoom',
+        playerName: playerName,
+        roomId: roomId
+    }));
 }
 
+// プレイヤー準備状態切り替え
 function togglePlayerReady() {
-    alert('オンライン機能は現在開発中です');
+    if (!gameState.onlineState.playerId || !gameState.onlineState.ws) {
+        return;
+    }
+    
+    gameState.onlineState.ws.send(JSON.stringify({
+        type: 'toggleReady',
+        playerId: gameState.onlineState.playerId,
+        roomId: gameState.onlineState.roomId
+    }));
 }
 
+// オンラインゲーム開始
 function startOnlineGame() {
-    alert('オンライン機能は現在開発中です');
+    if (!gameState.onlineState.isHost) {
+        alert('ホストのみがゲームを開始できます');
+        return;
+    }
+    
+    if (!gameState.onlineState.roomId || !gameState.onlineState.playerId) {
+        alert('ルーム情報が正しくありません');
+        return;
+    }
+    
+    // 選択可能な問題を準備
+    let questions = [...defaultQuestions, ...customQuestions];
+    questions = shuffleArray(questions).slice(0, 6);
+    
+    gameState.onlineState.ws.send(JSON.stringify({
+        type: 'startGame',
+        roomId: gameState.onlineState.roomId,
+        playerId: gameState.onlineState.playerId,
+        questions: questions
+    }));
 }
 
+// オンラインプレイヤーリスト更新
+function updateOnlinePlayerList(players) {
+    const playerListDiv = document.getElementById('onlinePlayerList');
+    if (!playerListDiv) return;
+    
+    playerListDiv.innerHTML = players.map(player => {
+        let labels = '';
+        if (player.id === gameState.onlineState.playerId) {
+            labels += '<span class="you-label">あなた</span>';
+        }
+        if (player.isHost) {
+            labels += '<span class="host-label">ホスト</span>';
+        }
+        
+        return `
+            <div class="player-item ${player.ready ? 'ready' : ''}">
+                <span>${player.name} ${labels}</span>
+                <span class="ready-status">${player.ready ? '準備完了' : '待機中'}</span>
+            </div>
+        `;
+    }).join('');
+}
+
+// オンラインクイズ開始
+function startOnlineQuiz(questions) {
+    gameState.questions = questions;
+    gameState.currentQuestion = 0;
+    gameState.mode = 'online';
+    
+    // スコア初期化
+    gameState.scores = {};
+    
+    playSound('start');
+}
+
+// オンライン問題表示
+function showOnlineQuestion(data) {
+    stopTimer();
+    
+    gameState.currentQuestion = data.questionNumber - 1;
+    gameState.currentAnswers = [];
+    gameState.hasAnswered = false;
+    
+    showScreen('quizScreen');
+    
+    document.getElementById('questionText').textContent = data.question.question;
+    document.getElementById('questionNumber').textContent = `第${data.questionNumber}問 / ${data.totalQuestions}問`;
+    
+    const choicesDiv = document.getElementById('choices');
+    choicesDiv.innerHTML = data.question.choices.map((choice, index) => `
+        <div class="choice" onclick="selectOnlineChoice(${index})">${choice}</div>
+    `).join('');
+    
+    document.getElementById('answerList').innerHTML = '';
+    
+    setTimeout(() => {
+        startTimer();
+    }, 100);
+}
+
+// オンライン選択肢選択
+function selectOnlineChoice(index) {
+    if (gameState.hasAnswered) {
+        return; // 既に回答済み
+    }
+    
+    gameState.hasAnswered = true;
+    stopTimer();
+    
+    const choices = document.querySelectorAll('.choice');
+    choices.forEach(choice => {
+        choice.style.pointerEvents = 'none';
+        choice.classList.add('disabled');
+    });
+    choices[index].classList.add('selected');
+    
+    gameState.onlineState.ws.send(JSON.stringify({
+        type: 'selectAnswer',
+        roomId: gameState.onlineState.roomId,
+        playerId: gameState.onlineState.playerId,
+        answerIndex: index,
+        timeLeft: gameState.timeLeft
+    }));
+}
+
+// オンライン回答受信処理
+function handleOnlineAnswerReceived(data) {
+    const answerData = {
+        playerId: data.playerId,
+        playerName: data.playerName,
+        answer: data.answerIndex,
+        timeLeft: data.timeLeft,
+        order: data.answerOrder
+    };
+    
+    gameState.currentAnswers.push(answerData);
+    
+    // 回答ログを更新
+    const answerList = document.getElementById('answerList');
+    if (answerList) {
+        const isYou = data.playerId === gameState.onlineState.playerId;
+        answerList.innerHTML += `
+            <div class="answer-item">
+                <span class="answer-order">${data.answerOrder}番目</span>
+                <span>${data.playerName}${isYou ? ' (あなた)' : ''}</span>
+                <span>回答時間: ${data.timeLeft}秒</span>
+            </div>
+        `;
+    }
+}
+
+// オンライン問題終了処理
+function handleOnlineQuestionEnd(data) {
+    stopTimer();
+    
+    const question = data.question;
+    const choices = document.querySelectorAll('.choice');
+    
+    // 正解を表示
+    choices[question.correct].classList.add('correct');
+    
+    // 各プレイヤーの回答結果を表示
+    data.results.forEach(result => {
+        if (result.answer !== question.correct && result.answer >= 0) {
+            choices[result.answer].classList.add('incorrect');
+        }
+        
+        if (result.correct) {
+            playSound('correct');
+        } else if (result.playerId === gameState.onlineState.playerId) {
+            playSound('incorrect');
+        }
+    });
+    
+    // 回答ログを更新
+    const answerList = document.getElementById('answerList');
+    if (answerList) {
+        const correctAnswers = data.results.filter(r => r.correct).sort((a, b) => b.timeLeft - a.timeLeft);
+        
+        answerList.innerHTML = `
+            <h4>回答結果</h4>
+            ${correctAnswers.map((result, index) => {
+                const isYou = result.playerId === gameState.onlineState.playerId;
+                return `
+                    <div class="answer-item correct">
+                        <span class="answer-order">${index + 1}位</span>
+                        <span>${result.playerName}${isYou ? ' (あなた)' : ''}</span>
+                        <span class="answer-points">+${result.points}pt</span>
+                    </div>
+                `;
+            }).join('')}
+        `;
+    }
+    
+    setTimeout(() => {
+        // 次の問題を待つ
+    }, 3000);
+}
+
+// オンライン結果表示
+function showOnlineResults(finalScores) {
+    stopTimer();
+    showScreen('resultScreen');
+    
+    const sortedScores = finalScores.sort((a, b) => b.score - a.score);
+    
+    const resultsDiv = document.getElementById('results');
+    resultsDiv.innerHTML = sortedScores.map((player, index) => {
+        const isYou = player.playerId === gameState.onlineState.playerId;
+        return `
+            <div class="rank-item rank-${Math.min(index + 1, 3)}">
+                <div>
+                    <span class="rank-number">${index + 1}</span>
+                    <span>${player.playerName}${isYou ? ' (あなた)' : ''}</span>
+                </div>
+                <div>${player.score}ポイント</div>
+            </div>
+        `;
+    }).join('');
+}
+
+// ルーム退出
 function leaveOnlineRoom() {
+    if (gameState.onlineState.playerId && gameState.onlineState.ws) {
+        gameState.onlineState.ws.send(JSON.stringify({
+            type: 'leaveRoom',
+            playerId: gameState.onlineState.playerId,
+            roomId: gameState.onlineState.roomId
+        }));
+    }
+    
+    gameState.onlineState.roomId = null;
+    gameState.onlineState.playerId = null;
+    gameState.onlineState.isHost = false;
+    
     showScreen('onlineMenuScreen');
 }
 
 // 初期化
 function init() {
     console.log('早押しクイズバトル初期化完了');
+    initWebSocket();
 }
 
 // ページ読み込み完了時に初期化
