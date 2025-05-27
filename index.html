@@ -1413,6 +1413,10 @@ function handleWebSocketMessage(data) {
             showCountdown(data.count, data.questionNumber, data.totalQuestions);
             break;
             
+        case 'nextQuestionCountdown':
+            showNextQuestionCountdown(data.count, data.nextQuestionNumber, data.totalQuestions);
+            break;
+            
         case 'newQuestion':
             showOnlineQuestion(data);
             break;
@@ -2659,6 +2663,28 @@ function leaveOnlineRoom() {
     gameState.onlineState.isHost = false;
     
     showScreen('onlineMenuScreen');
+}
+
+// 次の問題へのカウントダウン表示関数を追加
+function showNextQuestionCountdown(count, nextQuestionNumber, totalQuestions) {
+    const countdownDiv = document.getElementById('countdown');
+    const countdownNumber = document.getElementById('countdown-number');
+    const countdownText = document.getElementById('countdown-text');
+    
+    countdownNumber.textContent = count;
+    countdownText.textContent = `次の問題 (第${nextQuestionNumber}問/${totalQuestions}問) まで`;
+    
+    countdownDiv.style.display = 'block';
+    
+    // アニメーション効果
+    countdownNumber.style.transform = 'scale(1.2)';
+    setTimeout(() => {
+        countdownNumber.style.transform = 'scale(1)';
+    }, 200);
+    
+    if (count <= 0) {
+        countdownDiv.style.display = 'none';
+    }
 }
 
 // 初期化
