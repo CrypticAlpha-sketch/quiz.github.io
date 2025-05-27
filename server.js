@@ -720,7 +720,7 @@ function handleMessage(ws, data) {
         case 'selectAnswer':
             handleSelectAnswer(ws, data);
             break;
-        case 'toggleReady': // ready → toggleReady に修正
+        case 'toggleReady':
             handlePlayerReady(ws, data);
             break;
         default:
@@ -839,7 +839,7 @@ function handlePlayerReady(ws, data) {
     
     if (room) {
         broadcastToRoom(room.id, {
-            type: 'playerUpdate', // playerReady → playerUpdate に修正
+            type: 'playerUpdate',
             playerId: data.playerId,
             ready: player.ready,
             players: room.players.map(p => ({
@@ -854,435 +854,469 @@ function handlePlayerReady(ws, data) {
 
 // ゲーム開始処理
 function handleStartGame(ws, data) {
-    console.log('ゲーム開始リクエスト:', data);
-    
-    const room = rooms.get(data.roomId);
-    if (!room) {
-        console.log('ルームが見つかりません:', data.roomId);
-        return;
-    }
-    
-    const player = players.get(data.playerId);
-    if (!player || room.host !== player.id) {
-        ws.send(JSON.stringify({
-            type: 'error',
-            message: 'ゲームを開始する権限がありません'
-        }));
-        return;
-    }
-    
-    if (room.players.length < 2) {
-        ws.send(JSON.stringify({
-            type: 'error',
-            message: '最低2人のプレイヤーが必要です'
-        }));
-        return;
-    }
-    
-    // 問題の選択ロジックを改善
-    let questions;
-    
-    if (data.questions && data.questions.length >= 6) {
-        // クライアントから送られたカスタム問題がある場合
-        console.log('カスタム問題を使用:', data.questions.length + '問');
-        questions = shuffleArray(data.questions).slice(0, 6);
-    } else if (data.categories && data.categories.length > 0) {
-        // カテゴリが指定されている場合
-        console.log('指定カテゴリから問題選択:', data.categories);
-        questions = selectQuestions(data.categories, 6);
-    } else {
-        // デフォルト: 全カテゴリからランダム選択
-        console.log('全カテゴリから問題選択');
-        questions = selectQuestions(null, 6);
-    }
-    
-    room.questions = questions;
-    room.gameState = 'playing';
-    room.currentQuestion = 0;
-    
-    console.log(`ゲーム開始 - ルーム${room.id}, ${room.questions.length}問`);
-    console.log('選択された問題:', room.questions.map(q => q.question));
-    
-    broadcastToRoom(room.id, {
-        type: 'gameStart',
-        questions: room.questions
-    });
-    
-    setTimeout(() => {
-        sendQuestion(room);
-    }, 1000);
+   console.log('ゲーム開始リクエスト:', data);
+   
+   const room = rooms.get(data.roomId);
+   if (!room) {
+       console.log('ルームが見つかりません:', data.roomId);
+       return;
+   }
+   
+   const player = players.get(data.playerId);
+   if (!player || room.host !== player.id) {
+       ws.send(JSON.stringify({
+           type: 'error',
+           message: 'ゲームを開始する権限がありません'
+       }));
+       return;
+   }
+   
+   if (room.players.length < 2) {
+       ws.send(JSON.stringify({
+           type: 'error',
+           message: '最低2人のプレイヤーが必要です'
+       }));
+       return;
+   }
+   
+   // 問題の選択ロジックを改善
+   let questions;
+   
+   if (data.questions && data.questions.length >= 6) {
+       // クライアントから送られたカスタム問題がある場合
+       console.log('カスタム問題を使用:', data.questions.length + '問');
+       questions = shuffleArray(data.questions).slice(0, 6);
+   } else if (data.categories && data.categories.length > 0) {
+       // カテゴリが指定されている場合
+       console.log('指定カテゴリから問題選択:', data.categories);
+       questions = selectQuestions(data.categories, 6);
+   } else {
+       // デフォルト: 全カテゴリからランダム選択
+       console.log('全カテゴリから問題選択');
+       questions = selectQuestions(null, 6);
+   }
+   
+   room.questions = questions;
+   room.gameState = 'playing';
+   room.currentQuestion = 0;
+   
+   console.log(`ゲーム開始 - ルーム${room.id}, ${room.questions.length}問`);
+   console.log('選択された問題:', room.questions.map(q => q.question));
+   
+   broadcastToRoom(room.id, {
+       type: 'gameStart',
+       questions: room.questions
+   });
+   
+   // ゲーム開始後、カウントダウンを開始
+   setTimeout(() => {
+       startCountdown(room, 1); // 第1問のカウントダウン開始
+   }, 1000);
+}
+
+// カウントダウン開始（問題間のカウントダウン）
+function startCountdown(room, questionNumber) {
+   console.log(`カウントダウン開始 - ルーム${room.id}, 問題${questionNumber}`);
+   
+   let countdownTime = 5; // 5秒カウントダウン
+   
+   // カウントダウンを全員に送信
+   const sendCountdown = () => {
+       if (countdownTime > 0) {
+           broadcastToRoom(room.id, {
+               type: 'countdown',
+               count: countdownTime,
+               questionNumber: questionNumber,
+               totalQuestions: room.questions.length
+           });
+           
+           countdownTime--;
+           setTimeout(sendCountdown, 1000); // 1秒後に次のカウントダウン
+       } else {
+           // カウントダウン終了、問題を送信
+           setTimeout(() => {
+               sendQuestion(room);
+           }, 500);
+       }
+   };
+   
+   sendCountdown();
 }
 
 // 問題送信
 function sendQuestion(room) {
-    if (room.currentQuestion >= room.questions.length) {
-        endGame(room);
-        return;
-    }
-    
-    console.log(`問題${room.currentQuestion + 1}を送信 - ルーム${room.id}`);
-    
-    room.answers = [];
-    room.timeLeft = 15; // タイマー初期化
-    
-    broadcastToRoom(room.id, {
-        type: 'newQuestion',
-        questionNumber: room.currentQuestion + 1,
-        totalQuestions: room.questions.length,
-        question: room.questions[room.currentQuestion],
-        timeLeft: room.timeLeft
-    });
-    
-    // 問題のタイマーをクリア
-    if (room.questionTimer) {
-        clearTimeout(room.questionTimer);
-    }
-    if (room.countdownTimer) {
-        clearInterval(room.countdownTimer);
-    }
-    
-    // カウントダウンタイマー開始
-    room.countdownTimer = setInterval(() => {
-        room.timeLeft--;
-        
-        // 残り時間を全員に送信
-        broadcastToRoom(room.id, {
-            type: 'timerUpdate',
-            timeLeft: room.timeLeft
-        });
-        
-        if (room.timeLeft <= 0) {
-            clearInterval(room.countdownTimer);
-            console.log(`問題${room.currentQuestion + 1}の時間切れ - ルーム${room.id}`);
-            endQuestion(room);
-        }
-    }, 1000);
-    
-    // 20秒後のフェイルセーフ
-    room.questionTimer = setTimeout(() => {
-        if (room.gameState === 'playing' && room.timeLeft > 0) {
-            console.log(`問題${room.currentQuestion + 1}のフェイルセーフ発動 - ルーム${room.id}`);
-            endQuestion(room);
-        }
-    }, 20000);
+   if (room.currentQuestion >= room.questions.length) {
+       endGame(room);
+       return;
+   }
+   
+   console.log(`問題${room.currentQuestion + 1}を送信 - ルーム${room.id}`);
+   
+   room.answers = [];
+   room.timeLeft = 15; // タイマー初期化
+   
+   broadcastToRoom(room.id, {
+       type: 'newQuestion',
+       questionNumber: room.currentQuestion + 1,
+       totalQuestions: room.questions.length,
+       question: room.questions[room.currentQuestion],
+       timeLeft: room.timeLeft
+   });
+   
+   // 問題のタイマーをクリア
+   if (room.questionTimer) {
+       clearTimeout(room.questionTimer);
+   }
+   if (room.countdownTimer) {
+       clearInterval(room.countdownTimer);
+   }
+   
+   // カウントダウンタイマー開始
+   room.countdownTimer = setInterval(() => {
+       room.timeLeft--;
+       
+       // 残り時間を全員に送信
+       broadcastToRoom(room.id, {
+           type: 'timerUpdate',
+           timeLeft: room.timeLeft
+       });
+       
+       if (room.timeLeft <= 0) {
+           clearInterval(room.countdownTimer);
+           console.log(`問題${room.currentQuestion + 1}の時間切れ - ルーム${room.id}`);
+           endQuestion(room);
+       }
+   }, 1000);
+   
+   // 20秒後のフェイルセーフ
+   room.questionTimer = setTimeout(() => {
+       if (room.gameState === 'playing' && room.timeLeft > 0) {
+           console.log(`問題${room.currentQuestion + 1}のフェイルセーフ発動 - ルーム${room.id}`);
+           endQuestion(room);
+       }
+   }, 20000);
 }
 
 // 回答処理
 function handleSelectAnswer(ws, data) {
-    console.log('回答受信:', data);
-    
-    const room = rooms.get(data.roomId);
-    if (!room || room.gameState !== 'playing') {
-        console.log('回答処理失敗: ルームまたはゲーム状態が無効');
-        return;
-    }
-    
-    const player = players.get(data.playerId);
-    if (!player) {
-        console.log('回答処理失敗: プレイヤーが見つかりません');
-        return;
-    }
-    
-    // 重複回答チェック
-    if (room.answers.some(answer => answer.playerId === data.playerId)) {
-        console.log('重複回答をブロック:', player.name);
-        return;
-    }
-    
-    const question = room.questions[room.currentQuestion];
-    const isCorrect = data.answerIndex === question.correct;
-    
-    const answerData = {
-        playerId: data.playerId,
-        playerName: player.name,
-        answerIndex: data.answerIndex,
-        correct: isCorrect,
-        timeLeft: room.timeLeft, // サーバーサイドの時間を使用
-        timestamp: Date.now()
-    };
-    
-    room.answers.push(answerData);
-    
-    // ポイント計算（正解者のみ）
-    let points = 0;
-    if (isCorrect) {
-        const correctAnswersCount = room.answers.filter(a => a.correct).length;
-        switch (correctAnswersCount) {
-            case 1: points = 100; break;
-            case 2: points = 80; break;
-            case 3: points = 60; break;
-            default: points = 40; break;
-        }
-        room.scores[data.playerId] += points;
-    }
-    
-    console.log(`${player.name}が回答: ${isCorrect ? '正解' : '不正解'} (+${points}pt)`);
-    
-    // 回答受信を全員に通知
-    broadcastToRoom(room.id, {
-        type: 'answerReceived',
-        playerId: data.playerId,
-        playerName: player.name,
-        answerIndex: data.answerIndex,
-        timeLeft: room.timeLeft,
-        answerOrder: room.answers.length
-    });
-    
-    // 全員が回答したら問題終了
-    if (room.answers.length >= room.players.length) {
-        console.log('全員回答完了 - 問題終了');
-        if (room.questionTimer) {
-            clearTimeout(room.questionTimer);
-        }
-        if (room.countdownTimer) {
-            clearInterval(room.countdownTimer);
-        }
-        setTimeout(() => {
-            endQuestion(room);
-        }, 1000);
-    }
+   console.log('回答受信:', data);
+   
+   const room = rooms.get(data.roomId);
+   if (!room || room.gameState !== 'playing') {
+       console.log('回答処理失敗: ルームまたはゲーム状態が無効');
+       return;
+   }
+   
+   const player = players.get(data.playerId);
+   if (!player) {
+       console.log('回答処理失敗: プレイヤーが見つかりません');
+       return;
+   }
+   
+   // 重複回答チェック
+   if (room.answers.some(answer => answer.playerId === data.playerId)) {
+       console.log('重複回答をブロック:', player.name);
+       return;
+   }
+   
+   const question = room.questions[room.currentQuestion];
+   const isCorrect = data.answerIndex === question.correct;
+   
+   const answerData = {
+       playerId: data.playerId,
+       playerName: player.name,
+       answerIndex: data.answerIndex,
+       correct: isCorrect,
+       timeLeft: room.timeLeft, // サーバーサイドの時間を使用
+       timestamp: Date.now()
+   };
+   
+   room.answers.push(answerData);
+   
+   // ポイント計算（正解者のみ）
+   let points = 0;
+   if (isCorrect) {
+       const correctAnswersCount = room.answers.filter(a => a.correct).length;
+       switch (correctAnswersCount) {
+           case 1: points = 100; break;
+           case 2: points = 80; break;
+           case 3: points = 60; break;
+           default: points = 40; break;
+       }
+       room.scores[data.playerId] += points;
+   }
+   
+   console.log(`${player.name}が回答: ${isCorrect ? '正解' : '不正解'} (+${points}pt)`);
+   
+   // 回答受信を全員に通知
+   broadcastToRoom(room.id, {
+       type: 'answerReceived',
+       playerId: data.playerId,
+       playerName: player.name,
+       answerIndex: data.answerIndex,
+       timeLeft: room.timeLeft,
+       answerOrder: room.answers.length
+   });
+   
+   // 全員が回答したら問題終了
+   if (room.answers.length >= room.players.length) {
+       console.log('全員回答完了 - 問題終了');
+       if (room.questionTimer) {
+           clearTimeout(room.questionTimer);
+       }
+       if (room.countdownTimer) {
+           clearInterval(room.countdownTimer);
+       }
+       setTimeout(() => {
+           endQuestion(room);
+       }, 1000);
+   }
 }
 
 // 問題終了処理
 function endQuestion(room) {
-    console.log(`問題${room.currentQuestion + 1}終了 - ルーム${room.id}`);
-    
-    // タイマーをクリア
-    if (room.countdownTimer) {
-        clearInterval(room.countdownTimer);
-        room.countdownTimer = null;
-    }
-    if (room.questionTimer) {
-        clearTimeout(room.questionTimer);
-        room.questionTimer = null;
-    }
-    
-    const question = room.questions[room.currentQuestion];
-    
-    // 結果をポイント付きで送信
-    const results = room.answers.map(answer => {
-        let points = 0;
-        if (answer.correct) {
-            const correctOrder = room.answers
-                .filter(a => a.correct && a.timestamp <= answer.timestamp)
-                .length;
-            switch (correctOrder) {
-                case 1: points = 100; break;
-                case 2: points = 80; break;
-                case 3: points = 60; break;
-                default: points = 40; break;
-            }
-        }
-        
-        return {
-            playerId: answer.playerId,
-            playerName: answer.playerName,
-            answer: answer.answerIndex,
-            correct: answer.correct,
-            timeLeft: answer.timeLeft,
-            points: points
-        };
-    });
-    
-    broadcastToRoom(room.id, {
-        type: 'questionEnd',
-        question: question,
-        results: results
-    });
-    
-    // 3秒後に次の問題へ
-    setTimeout(() => {
-        nextQuestion(room);
-    }, 3000);
+   console.log(`問題${room.currentQuestion + 1}終了 - ルーム${room.id}`);
+   
+   // タイマーをクリア
+   if (room.countdownTimer) {
+       clearInterval(room.countdownTimer);
+       room.countdownTimer = null;
+   }
+   if (room.questionTimer) {
+       clearTimeout(room.questionTimer);
+       room.questionTimer = null;
+   }
+   
+   const question = room.questions[room.currentQuestion];
+   
+   // 結果をポイント付きで送信
+   const results = room.answers.map(answer => {
+       let points = 0;
+       if (answer.correct) {
+           const correctOrder = room.answers
+               .filter(a => a.correct && a.timestamp <= answer.timestamp)
+               .length;
+           switch (correctOrder) {
+               case 1: points = 100; break;
+               case 2: points = 80; break;
+               case 3: points = 60; break;
+               default: points = 40; break;
+           }
+       }
+       
+       return {
+           playerId: answer.playerId,
+           playerName: answer.playerName,
+           answer: answer.answerIndex,
+           correct: answer.correct,
+           timeLeft: answer.timeLeft,
+           points: points
+       };
+   });
+   
+   broadcastToRoom(room.id, {
+       type: 'questionEnd',
+       question: question,
+       results: results
+   });
+   
+   // 3秒後に次の問題へ
+   setTimeout(() => {
+       nextQuestion(room);
+   }, 3000);
 }
 
 // 次の問題
 function nextQuestion(room) {
-    room.currentQuestion++;
-    console.log(`次の問題へ: ${room.currentQuestion + 1}/${room.questions.length}`);
-    
-    if (room.currentQuestion >= room.questions.length) {
-        endGame(room);
-    } else {
-        // 次の問題通知
-        broadcastToRoom(room.id, {
-            type: 'nextQuestion',
-            questionNumber: room.currentQuestion + 1
-        });
-        
-        setTimeout(() => {
-            sendQuestion(room);
-        }, 1000);
-    }
+   room.currentQuestion++;
+   console.log(`次の問題へ: ${room.currentQuestion + 1}/${room.questions.length}`);
+   
+   if (room.currentQuestion >= room.questions.length) {
+       endGame(room);
+   } else {
+       // 次の問題通知
+       broadcastToRoom(room.id, {
+           type: 'nextQuestion',
+           questionNumber: room.currentQuestion + 1
+       });
+       
+       // カウントダウンを開始
+       setTimeout(() => {
+           startCountdown(room, room.currentQuestion + 1);
+       }, 1000);
+   }
 }
 
 // ゲーム終了
 function endGame(room) {
-    console.log(`ゲーム終了 - ルーム${room.id}`);
-    
-    room.gameState = 'finished';
-    
-    if (room.questionTimer) {
-        clearTimeout(room.questionTimer);
-    }
-    
-    const finalScores = Object.entries(room.scores)
-        .map(([playerId, score]) => ({
-            playerId,
-            playerName: players.get(playerId)?.name || 'Unknown',
-            score
-        }))
-        .sort((a, b) => b.score - a.score);
-    
-    console.log('最終スコア:', finalScores);
-    
-    broadcastToRoom(room.id, {
-        type: 'gameEnd',
-        finalScores: finalScores
-    });
+   console.log(`ゲーム終了 - ルーム${room.id}`);
+   
+   room.gameState = 'finished';
+   
+   if (room.questionTimer) {
+       clearTimeout(room.questionTimer);
+   }
+   
+   const finalScores = Object.entries(room.scores)
+       .map(([playerId, score]) => ({
+           playerId,
+           playerName: players.get(playerId)?.name || 'Unknown',
+           score
+       }))
+       .sort((a, b) => b.score - a.score);
+   
+   console.log('最終スコア:', finalScores);
+   
+   broadcastToRoom(room.id, {
+       type: 'gameEnd',
+       finalScores: finalScores
+   });
 }
 
 // 切断処理
 function handleDisconnect(ws) {
-    let disconnectedPlayer = null;
-    for (const [playerId, player] of players.entries()) {
-        if (player.ws === ws) {
-            disconnectedPlayer = { id: playerId, ...player };
-            players.delete(playerId);
-            break;
-        }
-    }
-    
-    if (!disconnectedPlayer) return;
-    
-    console.log(`プレイヤー切断: ${disconnectedPlayer.name}`);
-    
-    for (const [roomId, room] of rooms.entries()) {
-        const playerIndex = room.players.findIndex(p => p.id === disconnectedPlayer.id);
-        if (playerIndex !== -1) {
-            room.players.splice(playerIndex, 1);
-            delete room.scores[disconnectedPlayer.id];
-            
-            if (room.players.length === 0) {
-                if (room.questionTimer) {
-                    clearTimeout(room.questionTimer);
-                }
-                if (room.countdownTimer) {
-                    clearInterval(room.countdownTimer);
-                }
-                rooms.delete(roomId);
-                console.log(`ルーム削除: ${roomId}`);
-            } else {
-                broadcastToRoom(roomId, {
-                    type: 'playerLeft',
-                    playerId: disconnectedPlayer.id,
-                    playerName: disconnectedPlayer.name,
-                    players: room.players.map(p => ({
-                        id: p.id,
-                        name: p.name,
-                        ready: p.ready,
-                        isHost: p.id === room.host
-                    }))
-                });
-                
-                // ホストが切断した場合は新しいホストを選出
-                if (room.host === disconnectedPlayer.id && room.players.length > 0) {
-                    room.host = room.players[0].id;
-                    room.players[0].isHost = true;
-                    broadcastToRoom(roomId, {
-                        type: 'newHost',
-                        hostId: room.host
-                    });
-                }
-            }
-            break;
-        }
-    }
+   let disconnectedPlayer = null;
+   for (const [playerId, player] of players.entries()) {
+       if (player.ws === ws) {
+           disconnectedPlayer = { id: playerId, ...player };
+           players.delete(playerId);
+           break;
+       }
+   }
+   
+   if (!disconnectedPlayer) return;
+   
+   console.log(`プレイヤー切断: ${disconnectedPlayer.name}`);
+   
+   for (const [roomId, room] of rooms.entries()) {
+       const playerIndex = room.players.findIndex(p => p.id === disconnectedPlayer.id);
+       if (playerIndex !== -1) {
+           room.players.splice(playerIndex, 1);
+           delete room.scores[disconnectedPlayer.id];
+           
+           if (room.players.length === 0) {
+               if (room.questionTimer) {
+                   clearTimeout(room.questionTimer);
+               }
+               if (room.countdownTimer) {
+                   clearInterval(room.countdownTimer);
+               }
+               rooms.delete(roomId);
+               console.log(`ルーム削除: ${roomId}`);
+           } else {
+               broadcastToRoom(roomId, {
+                   type: 'playerLeft',
+                   playerId: disconnectedPlayer.id,
+                   playerName: disconnectedPlayer.name,
+                   players: room.players.map(p => ({
+                       id: p.id,
+                       name: p.name,
+                       ready: p.ready,
+                       isHost: p.id === room.host
+                   }))
+               });
+               
+               // ホストが切断した場合は新しいホストを選出
+               if (room.host === disconnectedPlayer.id && room.players.length > 0) {
+                   room.host = room.players[0].id;
+                   room.players[0].isHost = true;
+                   broadcastToRoom(roomId, {
+                       type: 'newHost',
+                       hostId: room.host
+                   });
+               }
+           }
+           break;
+       }
+   }
 }
 
 // ルーム退出処理
 function handleLeaveRoom(ws, data) {
-    const player = players.get(data.playerId);
-    if (!player) return;
-    
-    console.log(`プレイヤー退出: ${player.name}`);
-    
-    for (const [roomId, room] of rooms.entries()) {
-        const playerIndex = room.players.findIndex(p => p.id === data.playerId);
-        if (playerIndex !== -1) {
-            room.players.splice(playerIndex, 1);
-            delete room.scores[data.playerId];
-            
-            if (room.players.length === 0) {
-                if (room.questionTimer) {
-                    clearTimeout(room.questionTimer);
-                }
-                if (room.countdownTimer) {
-                    clearInterval(room.countdownTimer);
-                }
-                rooms.delete(roomId);
-                console.log(`ルーム削除: ${roomId}`);
-            } else {
-                broadcastToRoom(roomId, {
-                    type: 'playerLeft',
-                    playerId: data.playerId,
-                    playerName: player.name,
-                    players: room.players.map(p => ({
-                        id: p.id,
-                        name: p.name,
-                        ready: p.ready,
-                        isHost: p.id === room.host
-                    }))
-                });
-                
-                // ホストが退出した場合は新しいホストを選出
-                if (room.host === data.playerId && room.players.length > 0) {
-                    room.host = room.players[0].id;
-                    room.players[0].isHost = true;
-                    broadcastToRoom(roomId, {
-                        type: 'newHost',
-                        hostId: room.host
-                    });
-                }
-            }
-            break;
-        }
-    }
-    
-    players.delete(data.playerId);
+   const player = players.get(data.playerId);
+   if (!player) return;
+   
+   console.log(`プレイヤー退出: ${player.name}`);
+   
+   for (const [roomId, room] of rooms.entries()) {
+       const playerIndex = room.players.findIndex(p => p.id === data.playerId);
+       if (playerIndex !== -1) {
+           room.players.splice(playerIndex, 1);
+           delete room.scores[data.playerId];
+           
+           if (room.players.length === 0) {
+               if (room.questionTimer) {
+                   clearTimeout(room.questionTimer);
+               }
+               if (room.countdownTimer) {
+                   clearInterval(room.countdownTimer);
+               }
+               rooms.delete(roomId);
+               console.log(`ルーム削除: ${roomId}`);
+           } else {
+               broadcastToRoom(roomId, {
+                   type: 'playerLeft',
+                   playerId: data.playerId,
+                   playerName: player.name,
+                   players: room.players.map(p => ({
+                       id: p.id,
+                       name: p.name,
+                       ready: p.ready,
+                       isHost: p.id === room.host
+                   }))
+               });
+               
+               // ホストが退出した場合は新しいホストを選出
+               if (room.host === data.playerId && room.players.length > 0) {
+                   room.host = room.players[0].id;
+                   room.players[0].isHost = true;
+                   broadcastToRoom(roomId, {
+                       type: 'newHost',
+                       hostId: room.host
+                   });
+               }
+           }
+           break;
+       }
+   }
+   
+   players.delete(data.playerId);
 }
 
 // サーバー起動
 server.listen(PORT, () => {
-    console.log(`🚀 早押しクイズサーバーが起動しました`);
-    console.log(`📡 ポート: ${PORT}`);
-    console.log(`🌐 HTTPサーバー: http://localhost:${PORT}`);
-    console.log(`🔌 WebSocketサーバー: ws://localhost:${PORT}`);
+   console.log(`🚀 早押しクイズサーバーが起動しました`);
+   console.log(`📡 ポート: ${PORT}`);
+   console.log(`🌐 HTTPサーバー: http://localhost:${PORT}`);
+   console.log(`🔌 WebSocketサーバー: ws://localhost:${PORT}`);
 });
 
 // 定期的な統計情報
 setInterval(() => {
-    console.log(`📊 統計 - アクティブルーム: ${rooms.size}, 接続プレイヤー: ${players.size}`);
+   console.log(`📊 統計 - アクティブルーム: ${rooms.size}, 接続プレイヤー: ${players.size}`);
 }, 30000);
 
 // グレースフルシャットダウン
 process.on('SIGINT', () => {
-    console.log('サーバーを終了しています...');
-    
-    // 全てのタイマーをクリア
-    rooms.forEach(room => {
-        if (room.questionTimer) {
-            clearTimeout(room.questionTimer);
-        }
-    });
-    
-    // 全ての接続を閉じる
-    wss.clients.forEach(ws => {
-        ws.close();
-    });
-    
-    server.close(() => {
-        console.log('サーバーが正常に終了しました');
-        process.exit(0);
-    });
+   console.log('サーバーを終了しています...');
+   
+   // 全てのタイマーをクリア
+   rooms.forEach(room => {
+       if (room.questionTimer) {
+           clearTimeout(room.questionTimer);
+       }
+       if (room.countdownTimer) {
+           clearInterval(room.countdownTimer);
+       }
+   });
+   
+   // 全ての接続を閉じる
+   wss.clients.forEach(ws => {
+       ws.close();
+   });
+   
+   server.close(() => {
+       console.log('サーバーが正常に終了しました');
+       process.exit(0);
+   });
 });
