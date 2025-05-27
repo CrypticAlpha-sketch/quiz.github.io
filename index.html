@@ -25,6 +25,7 @@
     --accent-success: #16a34a;
     --accent-warning: #f59e0b;
     --accent-danger: #dc2626;
+    --accent-info: #3b82f6;
     
     --border-light: #e5e5e5;
     --border-medium: #d4d4d4;
@@ -84,7 +85,7 @@ body {
     position: relative;
 }
 
-/* 背景グリッド - 参考サイト風 */
+/* 背景グリッド */
 body::before {
     --size: 40px;
     --line: color-mix(in hsl, var(--text-primary), transparent 90%);
@@ -125,7 +126,7 @@ body::before {
     position: relative;
 }
 
-/* タイトル - 参考サイト風のスタイル */
+/* タイトル */
 h1 {
     font-size: clamp(2.5rem, 8vw, 5rem);
     font-weight: 600;
@@ -227,7 +228,7 @@ h3 {
 /* モード選択カード */
 .mode-selection {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 1.5rem;
     margin: 2rem 0;
 }
@@ -282,6 +283,166 @@ h3 {
     font-size: 0.95rem;
     position: relative;
     z-index: 1;
+}
+
+/* 練習モード設定 */
+.practice-settings {
+    background: var(--bg-secondary);
+    border-radius: var(--border-radius-lg);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    border: 1px solid var(--border-light);
+}
+
+.checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: var(--border-radius);
+    transition: var(--transition);
+}
+
+.checkbox-item:hover {
+    background: var(--bg-tertiary);
+}
+
+.checkbox-item input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+/* 統計情報 */
+.practice-stats {
+    background: var(--bg-secondary);
+    border-radius: var(--border-radius-lg);
+    padding: 2rem;
+    margin: 2rem 0;
+    border: 1px solid var(--border-light);
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.stat-item {
+    background: var(--bg-primary);
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    text-align: center;
+    border: 1px solid var(--border-light);
+    transition: var(--transition);
+}
+
+.stat-item:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-medium);
+}
+
+.stat-label {
+    display: block;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+.stat-value {
+    display: block;
+    color: var(--accent-primary);
+    font-size: 2rem;
+    font-weight: 600;
+    font-feature-settings: 'tnum';
+}
+
+/* 復習セクション */
+.review-section {
+    background: var(--bg-secondary);
+    border-radius: var(--border-radius-lg);
+    padding: 2rem;
+    margin: 2rem 0;
+    border: 1px solid var(--border-light);
+}
+
+.review-question {
+    background: var(--bg-primary);
+    padding: 1.5rem;
+    margin: 1rem 0;
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-light);
+}
+
+.review-question-text {
+    font-weight: 500;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+}
+
+.review-choices {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.review-choice {
+    padding: 0.5rem 1rem;
+    border-radius: var(--border-radius);
+    font-size: 0.9rem;
+}
+
+.review-choice.correct {
+    background: color-mix(in oklch, var(--accent-success), transparent 90%);
+    color: var(--accent-success);
+    border: 1px solid var(--accent-success);
+}
+
+.review-choice.incorrect {
+    background: color-mix(in oklch, var(--accent-danger), transparent 90%);
+    color: var(--accent-danger);
+    border: 1px solid var(--accent-danger);
+}
+
+.review-choice.neutral {
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-light);
+}
+
+/* 練習コントロール */
+.practice-controls {
+    text-align: center;
+    margin: 2rem 0;
+}
+
+/* 解説エリア */
+.explanation {
+    background: var(--bg-secondary);
+    border-radius: var(--border-radius-lg);
+    padding: 2rem;
+    margin-top: 2rem;
+    border: 1px solid var(--border-light);
+    border-left: 4px solid var(--accent-info);
+}
+
+.explanation h4 {
+    color: var(--accent-info);
+    margin-bottom: 1rem;
+}
+
+#explanationText {
+    color: var(--text-primary);
+    line-height: 1.6;
 }
 
 /* ボタンスタイル */
@@ -363,6 +524,12 @@ h3 {
     background: var(--accent-secondary);
     color: var(--text-light);
     border-color: var(--accent-secondary);
+}
+
+.btn-info {
+    background: var(--accent-info);
+    color: var(--text-light);
+    border-color: var(--accent-info);
 }
 
 /* フォーム要素 */
@@ -525,12 +692,14 @@ h3 {
     background: var(--accent-success);
     color: var(--text-light);
     border-color: var(--accent-success);
+    animation: correctAnswer 0.6s ease-in-out;
 }
 
 .choice.incorrect {
     background: var(--accent-danger);
     color: var(--text-light);
     border-color: var(--accent-danger);
+    animation: incorrectAnswer 0.6s ease-in-out;
 }
 
 .choice.disabled {
@@ -801,6 +970,10 @@ h3 {
     .countdown-number {
         font-size: clamp(5rem, 15vw, 10rem);
     }
+    
+    .stats-grid {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    }
 }
 
 /* プレースホルダー */
@@ -917,6 +1090,11 @@ h3 {
             <!-- ホーム画面 -->
             <div id="homeScreen" class="screen active">
                 <div class="mode-selection">
+                    <div class="mode-card" onclick="startPracticeMode()">
+                        <span class="icon">🎯</span>
+                        <h3>練習モード</h3>
+                        <p>一人でじっくり問題に挑戦しよう</p>
+                    </div>
                     <div class="mode-card" onclick="startLocalGame()">
                         <span class="icon">🏠</span>
                         <h3>ローカル対戦</h3>
@@ -931,6 +1109,98 @@ h3 {
                 <div class="center">
                     <button class="btn btn-warning" onclick="showQuestionCreator()">
                         ✏️ オリジナル問題を作成
+                    </button>
+                </div>
+            </div>
+
+            <!-- 練習モード設定画面 -->
+            <div id="practiceModeScreen" class="screen">
+                <h2>🎯 練習モード設定</h2>
+                
+                <div class="practice-settings">
+                    <div class="form-group">
+                        <label>⏱️ 制限時間</label>
+                        <select id="practiceTimeLimit">
+                            <option value="10">10秒</option>
+                            <option value="15" selected>15秒</option>
+                            <option value="20">20秒</option>
+                            <option value="30">30秒</option>
+                            <option value="-1">制限なし</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>📊 問題数</label>
+                        <select id="practiceQuestionCount">
+                            <option value="5">5問</option>
+                            <option value="10" selected>10問</option>
+                            <option value="15">15問</option>
+                            <option value="20">20問</option>
+                            <option value="-1">全問題</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>🔄 問題順序</label>
+                        <select id="practiceQuestionOrder">
+                            <option value="random" selected>ランダム</option>
+                            <option value="category">カテゴリ順</option>
+                            <option value="difficulty">難易度順</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>📈 結果表示</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-item">
+                                <input type="checkbox" id="showAnswerExplanation" checked>
+                                <span>解説を表示</span>
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" id="showStatistics" checked>
+                                <span>統計情報を表示</span>
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" id="reviewIncorrect" checked>
+                                <span>間違えた問題を復習</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
+                <p style="text-align: center; color: var(--text-secondary); margin: 2rem 0;">
+                    挑戦したいカテゴリーを選択してください（複数選択可能）
+                </p>
+                <div class="category-selection" id="practiceCategorySelection">
+                    <div class="category-item" data-category="general" onclick="togglePracticeCategory('general')">
+                        <h4>📚 一般常識</h4>
+                    </div>
+                    <div class="category-item" data-category="geography" onclick="togglePracticeCategory('geography')">
+                        <h4>🌏 地理</h4>
+                    </div>
+                    <div class="category-item" data-category="history" onclick="togglePracticeCategory('history')">
+                        <h4>📜 歴史</h4>
+                    </div>
+                    <div class="category-item" data-category="science" onclick="togglePracticeCategory('science')">
+                        <h4>🔬 科学</h4>
+                    </div>
+                    <div class="category-item" data-category="sports" onclick="togglePracticeCategory('sports')">
+                        <h4>⚽ スポーツ</h4>
+                    </div>
+                    <div class="category-item" data-category="entertainment" onclick="togglePracticeCategory('entertainment')">
+                        <h4>🎬 エンタメ</h4>
+                    </div>
+                    <div class="category-item" data-category="custom" onclick="togglePracticeCategory('custom')">
+                        <h4>✏️ カスタム</h4>
+                    </div>
+                </div>
+                
+                <div class="center">
+                    <button class="btn btn-success" onclick="startPracticeGame()">
+                        🚀 練習開始
+                    </button>
+                    <button class="btn btn-danger" onclick="showHome()">
+                        ← 戻る
                     </button>
                 </div>
             </div>
@@ -1073,7 +1343,7 @@ h3 {
                 <div class="quiz-header">
                     <div class="question-number" id="questionNumber">第1問 / 6問</div>
                     <div class="timer" id="timer">15</div>
-                    <div class="game-mode-info">
+                    <div class="game-mode-info" id="gameModeInfo">
                         ⚡ 正解者全員にポイント！早押しで高得点を狙え！
                     </div>
                 </div>
@@ -1088,17 +1358,65 @@ h3 {
                     <div class="choice" onclick="selectChoice(2)">選択肢3</div>
                 </div>
                 
+                <!-- 練習モード用のスキップボタン -->
+                <div class="practice-controls" id="practiceControls" style="display: none;">
+                    <button class="btn btn-secondary" onclick="skipQuestion()">
+                        ⏭️ この問題をスキップ
+                    </button>
+                </div>
+                
                 <!-- 回答者表示エリア -->
                 <div class="answer-log" id="answerLog">
                     <h4>📊 回答状況</h4>
                     <div id="answerList"></div>
                 </div>
+                
+                <!-- 練習モード用の解説表示 -->
+                <div class="explanation" id="explanationArea" style="display: none;">
+                    <h4>💡 解説</h4>
+                    <div id="explanationText"></div>
+                </div>
             </div>
 
             <!-- 結果画面 -->
             <div id="resultScreen" class="screen">
-                <h2>🏆 最終結果</h2>
+                <h2 id="resultTitle">🏆 最終結果</h2>
                 <div class="results" id="results"></div>
+                
+                <!-- 練習モード用の統計情報 -->
+                <div class="practice-stats" id="practiceStats" style="display: none;">
+                    <h3>📈 統計情報</h3>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <span class="stat-label">正答率</span>
+                            <span class="stat-value" id="correctRate">0%</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">平均回答時間</span>
+                            <span class="stat-value" id="averageTime">0秒</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">総得点</span>
+                            <span class="stat-value" id="totalScore">0点</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">連続正解</span>
+                            <span class="stat-value" id="maxStreak">0問</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 間違えた問題の復習 -->
+                <div class="review-section" id="reviewSection" style="display: none;">
+                    <h3>🔄 間違えた問題の復習</h3>
+                    <div id="reviewQuestions"></div>
+                    <div class="center">
+                        <button class="btn btn-warning" onclick="startReviewMode()">
+                            📝 復習モードで再挑戦
+                        </button>
+                    </div>
+                </div>
+                
                 <div class="center">
                     <button class="btn btn-primary" onclick="resetGame()">
                         🔄 もう一度プレイ
@@ -1145,6 +1463,10 @@ h3 {
                         <label>✅ 正解の選択肢番号（1-3）</label>
                         <input type="number" id="correctAnswer" min="1" max="3" placeholder="1">
                     </div>
+                    <div class="form-group">
+                        <label>💡 解説（オプション）</label>
+                        <textarea id="questionExplanation" placeholder="問題の解説を入力してください（練習モードで表示されます）"></textarea>
+                    </div>
                     <button class="btn btn-success" onclick="addQuestion()">
                         ➕ 問題を追加
                     </button>
@@ -1167,7 +1489,7 @@ h3 {
     <script>
         // ゲーム状態
 let gameState = {
-    mode: 'local', // local, online
+    mode: 'local', // local, online, practice
     players: [],
     currentQuestion: 0,
     questions: [],
@@ -1176,13 +1498,28 @@ let gameState = {
     scores: {},
     selectedCategories: [],
     currentAnswers: [],
-    hasAnswered: false, // オンライン時の重複回答防止
+    hasAnswered: false,
     onlineState: {
         ws: null,
         roomId: null,
         playerId: null,
         isHost: false,
         connected: false
+    },
+    practiceState: {
+        selectedCategories: [],
+        timeLimit: 15,
+        questionCount: 10,
+        questionOrder: 'random',
+        showExplanation: true,
+        showStatistics: true,
+        reviewIncorrect: true,
+        startTime: null,
+        incorrectAnswers: [],
+        answerTimes: [],
+        streak: 0,
+        maxStreak: 0,
+        currentStreak: 0
     }
 };
 
@@ -1193,19 +1530,22 @@ const defaultQuestions = {
             question: "日本の首都はどこですか？",
             choices: ["大阪", "東京", "京都"],
             correct: 1,
-            category: "general"
+            category: "general",
+            explanation: "日本の首都は東京です。1868年の明治維新以降、政治・経済の中心地となりました。"
         },
         {
             question: "日本の通貨単位は？",
             choices: ["ウォン", "元", "円"],
             correct: 2,
-            category: "general"
+            category: "general",
+            explanation: "日本の通貨単位は円（えん）です。記号は¥で表されます。"
         },
         {
             question: "日本の国花は？",
             choices: ["桜", "菊", "梅"],
             correct: 0,
-            category: "general"
+            category: "general",
+            explanation: "日本の国花は桜です。春の象徴として古くから愛されています。"
         }
     ],
     geography: [
@@ -1213,19 +1553,22 @@ const defaultQuestions = {
             question: "富士山の高さは？",
             choices: ["3,776m", "3,676m", "3,876m"],
             correct: 0,
-            category: "geography"
+            category: "geography",
+            explanation: "富士山の高さは3,776mで、日本最高峰の山です。"
         },
         {
             question: "日本で一番大きな湖は？",
             choices: ["霞ヶ浦", "琵琶湖", "洞爺湖"],
             correct: 1,
-            category: "geography"
+            category: "geography",
+            explanation: "琵琶湖は滋賀県にある日本最大の湖です。面積は約670.3km²です。"
         },
         {
             question: "日本で一番長い川は？",
             choices: ["利根川", "信濃川", "石狩川"],
             correct: 1,
-            category: "geography"
+            category: "geography",
+            explanation: "信濃川は新潟県を流れる日本最長の川で、全長367kmです。"
         }
     ],
     history: [
@@ -1233,19 +1576,22 @@ const defaultQuestions = {
             question: "鎌倉幕府を開いたのは誰？",
             choices: ["源頼朝", "足利尊氏", "徳川家康"],
             correct: 0,
-            category: "history"
+            category: "history",
+            explanation: "源頼朝が1192年に鎌倉幕府を開き、日本初の武家政権を確立しました。"
         },
         {
             question: "明治維新は何年？",
             choices: ["1868年", "1858年", "1878年"],
             correct: 0,
-            category: "history"
+            category: "history",
+            explanation: "明治維新は1868年に起こり、江戸時代から明治時代への転換点となりました。"
         },
         {
             question: "第二次世界大戦が終わった年は？",
             choices: ["1944年", "1945年", "1946年"],
             correct: 1,
-            category: "history"
+            category: "history",
+            explanation: "第二次世界大戦は1945年に終結しました。日本は8月15日に終戦を迎えました。"
         }
     ],
     science: [
@@ -1253,19 +1599,22 @@ const defaultQuestions = {
             question: "水の化学式は？",
             choices: ["CO2", "H2O", "O2"],
             correct: 1,
-            category: "science"
+            category: "science",
+            explanation: "水の化学式はH2Oです。水素原子2個と酸素原子1個から構成されています。"
         },
         {
             question: "光の速度は約？",
             choices: ["30万km/秒", "3万km/秒", "300万km/秒"],
             correct: 0,
-            category: "science"
+            category: "science",
+            explanation: "光の速度は約30万km/秒（正確には299,792,458m/秒）です。"
         },
         {
             question: "地球から太陽までの距離は約？",
             choices: ["1億5000万km", "1000万km", "10億km"],
             correct: 0,
-            category: "science"
+            category: "science",
+            explanation: "地球から太陽までの平均距離は約1億5000万kmで、これを1天文単位（AU）と呼びます。"
         }
     ],
     sports: [
@@ -1273,19 +1622,22 @@ const defaultQuestions = {
             question: "東京オリンピック2020の開催年は？",
             choices: ["2020年", "2021年", "2022年"],
             correct: 1,
-            category: "sports"
+            category: "sports",
+            explanation: "東京オリンピック2020は新型コロナウイルスの影響で2021年に延期開催されました。"
         },
         {
             question: "サッカーのワールドカップは何年ごと？",
             choices: ["2年", "3年", "4年"],
             correct: 2,
-            category: "sports"
+            category: "sports",
+            explanation: "FIFAワールドカップは4年に一度開催される世界最大のサッカー大会です。"
         },
         {
             question: "野球で1イニングに投手が投げる最少球数は？",
             choices: ["3球", "6球", "9球"],
             correct: 0,
-            category: "sports"
+            category: "sports",
+            explanation: "3人の打者を3球で三振に取れば、1イニング最少3球で終わります。"
         }
     ],
     entertainment: [
@@ -1293,25 +1645,426 @@ const defaultQuestions = {
             question: "ジブリ作品「千と千尋の神隠し」の監督は？",
             choices: ["宮崎駿", "高畑勲", "細田守"],
             correct: 0,
-            category: "entertainment"
+            category: "entertainment",
+            explanation: "「千と千尋の神隠し」は宮崎駿監督による2001年の作品で、日本映画史上最高の興行収入を記録しました。"
         },
         {
             question: "「鬼滅の刃」の主人公の名前は？",
             choices: ["竈門炭治郎", "我妻善逸", "嘴平伊之助"],
             correct: 0,
-            category: "entertainment"
+            category: "entertainment",
+            explanation: "竈門炭治郎（かまど たんじろう）が「鬼滅の刃」の主人公です。"
         },
         {
             question: "ポケモンの最初の御三家は？",
             choices: ["フシギダネ・ヒトカゲ・ゼニガメ", "チコリータ・ヒノアラシ・ワニノコ", "キモリ・アチャモ・ミズゴロウ"],
             correct: 0,
-            category: "entertainment"
+            category: "entertainment",
+            explanation: "初代ポケモン（赤・緑）の御三家はフシギダネ（くさ）、ヒトカゲ（ほのお）、ゼニガメ（みず）です。"
         }
     ]
 };
 
 // カスタム問題管理
 let customQuestions = [];
+
+// 練習モード機能
+function startPracticeMode() {
+    gameState.mode = 'practice';
+    showScreen('practiceModeScreen');
+}
+
+function togglePracticeCategory(categoryKey) {
+    const categoryItem = document.querySelector(`#practiceCategorySelection [data-category="${categoryKey}"]`);
+    if (!categoryItem) return;
+    
+    const index = gameState.practiceState.selectedCategories.indexOf(categoryKey);
+    if (index === -1) {
+        gameState.practiceState.selectedCategories.push(categoryKey);
+        categoryItem.classList.add('selected');
+    } else {
+        gameState.practiceState.selectedCategories.splice(index, 1);
+        categoryItem.classList.remove('selected');
+    }
+}
+
+function startPracticeGame() {
+    if (gameState.practiceState.selectedCategories.length === 0) {
+        alert('最低1つのカテゴリを選択してください');
+        return;
+    }
+    
+    // 設定を取得
+    gameState.practiceState.timeLimit = parseInt(document.getElementById('practiceTimeLimit').value);
+    gameState.practiceState.questionCount = parseInt(document.getElementById('practiceQuestionCount').value);
+    gameState.practiceState.questionOrder = document.getElementById('practiceQuestionOrder').value;
+    gameState.practiceState.showExplanation = document.getElementById('showAnswerExplanation').checked;
+    gameState.practiceState.showStatistics = document.getElementById('showStatistics').checked;
+    gameState.practiceState.reviewIncorrect = document.getElementById('reviewIncorrect').checked;
+    
+    // 練習用の問題を準備
+    let questions = loadPracticeQuestions();
+    
+    if (questions.length === 0) {
+        alert('選択したカテゴリに問題がありません');
+        return;
+    }
+    
+    // 問題数の調整
+    if (gameState.practiceState.questionCount > 0 && gameState.practiceState.questionCount < questions.length) {
+        questions = questions.slice(0, gameState.practiceState.questionCount);
+    }
+    
+    // 問題順序の設定
+    if (gameState.practiceState.questionOrder === 'random') {
+        questions = shuffleArray(questions);
+    } else if (gameState.practiceState.questionOrder === 'category') {
+        questions.sort((a, b) => a.category.localeCompare(b.category));
+    }
+    
+    gameState.questions = questions;
+    gameState.currentQuestion = 0;
+    gameState.mode = 'practice';
+    
+    // 練習モード用の状態初期化
+    gameState.practiceState.startTime = Date.now();
+    gameState.practiceState.incorrectAnswers = [];
+    gameState.practiceState.answerTimes = [];
+    gameState.practiceState.currentStreak = 0;
+    gameState.practiceState.maxStreak = 0;
+    gameState.scores = { practice: 0 };
+    
+    showPracticeQuestion();
+}
+
+function loadPracticeQuestions() {
+    const saved = localStorage.getItem('customQuestions');
+    customQuestions = saved ? JSON.parse(saved) : [];
+    
+    let allQuestions = [];
+    
+    gameState.practiceState.selectedCategories.forEach(category => {
+        if (defaultQuestions[category]) {
+            allQuestions = allQuestions.concat(defaultQuestions[category]);
+        }
+        if (category === 'custom') {
+            allQuestions = allQuestions.concat(customQuestions);
+        }
+    });
+    
+    return allQuestions;
+}
+
+function showPracticeQuestion() {
+    if (gameState.currentQuestion >= gameState.questions.length) {
+        showPracticeResults();
+        return;
+    }
+    
+    const question = gameState.questions[gameState.currentQuestion];
+    gameState.hasAnswered = false;
+    gameState.questionStartTime = Date.now();
+    
+    showScreen('quizScreen');
+    
+    // 練習モード用のUI更新
+    document.getElementById('gameModeInfo').textContent = '🎯 練習モード - じっくり考えて正解を目指そう！';
+    document.getElementById('practiceControls').style.display = 'block';
+    document.getElementById('answerLog').style.display = 'none';
+    document.getElementById('explanationArea').style.display = 'none';
+    
+    document.getElementById('questionText').textContent = question.question;
+    document.getElementById('questionNumber').textContent = `第${gameState.currentQuestion + 1}問 / ${gameState.questions.length}問`;
+    
+    const choicesDiv = document.getElementById('choices');
+    choicesDiv.innerHTML = question.choices.map((choice, index) => `
+        <div class="choice" onclick="selectPracticeChoice(${index})">${choice}</div>
+    `).join('');
+    
+    // タイマー設定
+    if (gameState.practiceState.timeLimit > 0) {
+        gameState.timeLeft = gameState.practiceState.timeLimit;
+        startPracticeTimer();
+    } else {
+        document.getElementById('timer').textContent = '∞';
+        gameState.timeLeft = -1;
+    }
+}
+
+function startPracticeTimer() {
+    if (gameState.timer) {
+        clearInterval(gameState.timer);
+        gameState.timer = null;
+    }
+    
+    updateTimerDisplay();
+    
+    if (gameState.timeLeft > 0) {
+        gameState.timer = setInterval(() => {
+            gameState.timeLeft--;
+            updateTimerDisplay();
+            
+            if (gameState.timeLeft <= 0) {
+                clearInterval(gameState.timer);
+                gameState.timer = null;
+                handlePracticeTimeUp();
+            }
+        }, 1000);
+    }
+}
+
+function selectPracticeChoice(index) {
+    if (gameState.hasAnswered) return;
+    
+    gameState.hasAnswered = true;
+    stopTimer();
+    
+    const answerTime = gameState.questionStartTime ? (Date.now() - gameState.questionStartTime) / 1000 : 0;
+    gameState.practiceState.answerTimes.push(answerTime);
+    
+    const question = gameState.questions[gameState.currentQuestion];
+    const isCorrect = index === question.correct;
+    
+    // 選択肢の色を更新
+    const choices = document.querySelectorAll('.choice');
+    choices.forEach(choice => {
+        choice.style.pointerEvents = 'none';
+        choice.classList.add('disabled');
+    });
+    
+    if (isCorrect) {
+        choices[index].classList.add('correct');
+        gameState.scores.practice += calculatePracticeScore(answerTime);
+        gameState.practiceState.currentStreak++;
+        gameState.practiceState.maxStreak = Math.max(gameState.practiceState.maxStreak, gameState.practiceState.currentStreak);
+    } else {
+        choices[index].classList.add('incorrect');
+        choices[question.correct].classList.add('correct');
+        gameState.practiceState.incorrectAnswers.push({
+            question: question,
+            userAnswer: index,
+            correctAnswer: question.correct
+        });
+        gameState.practiceState.currentStreak = 0;
+    }
+    
+    // 解説を表示
+    if (gameState.practiceState.showExplanation && question.explanation) {
+        showExplanation(question.explanation, isCorrect);
+    }
+    
+    // 練習コントロールを更新
+    updatePracticeControls(isCorrect);
+    
+    setTimeout(() => {
+        nextPracticeQuestion();
+    }, gameState.practiceState.showExplanation ? 4000 : 2000);
+}
+
+function calculatePracticeScore(answerTime) {
+    const baseScore = 100;
+    const timeBonus = Math.max(0, (gameState.practiceState.timeLimit - answerTime) * 2);
+    return Math.round(baseScore + timeBonus);
+}
+
+function showExplanation(explanationText, isCorrect) {
+    const explanationArea = document.getElementById('explanationArea');
+    const explanationTextDiv = document.getElementById('explanationText');
+    
+    explanationTextDiv.textContent = explanationText;
+    explanationArea.style.display = 'block';
+    
+    // 正解/不正解に応じてスタイルを変更
+    if (isCorrect) {
+        explanationArea.style.borderLeftColor = 'var(--accent-success)';
+    } else {
+        explanationArea.style.borderLeftColor = 'var(--accent-danger)';
+    }
+}
+
+function updatePracticeControls(isCorrect) {
+    const practiceControls = document.getElementById('practiceControls');
+    practiceControls.innerHTML = `
+        <div style="text-align: center; margin: 1rem 0;">
+            <span style="font-size: 1.2rem; font-weight: 500; color: ${isCorrect ? 'var(--accent-success)' : 'var(--accent-danger)'};">
+                ${isCorrect ? '✅ 正解！' : '❌ 不正解'}
+            </span>
+        </div>
+        <button class="btn btn-primary" onclick="nextPracticeQuestion()">
+            ⏭️ 次の問題
+        </button>
+        <button class="btn btn-secondary" onclick="skipQuestion()">
+            ⏩ スキップ
+        </button>
+    `;
+}
+
+function handlePracticeTimeUp() {
+    if (gameState.hasAnswered) return;
+    
+    gameState.hasAnswered = true;
+    const question = gameState.questions[gameState.currentQuestion];
+    
+    // 時間切れを記録
+    gameState.practiceState.answerTimes.push(gameState.practiceState.timeLimit);
+    gameState.practiceState.incorrectAnswers.push({
+        question: question,
+        userAnswer: -1, // -1は時間切れを表す
+        correctAnswer: question.correct
+    });
+    gameState.practiceState.currentStreak = 0;
+    
+    const choices = document.querySelectorAll('.choice');
+    choices.forEach(choice => {
+        choice.style.pointerEvents = 'none';
+        choice.classList.add('disabled');
+    });
+    choices[question.correct].classList.add('correct');
+    
+    if (gameState.practiceState.showExplanation && question.explanation) {
+        showExplanation(question.explanation, false);
+    }
+    
+    updatePracticeControls(false);
+    
+    setTimeout(() => {
+        nextPracticeQuestion();
+    }, gameState.practiceState.showExplanation ? 4000 : 2000);
+}
+
+function skipQuestion() {
+    if (gameState.hasAnswered) {
+        nextPracticeQuestion();
+        return;
+    }
+    
+    stopTimer();
+    gameState.hasAnswered = true;
+    
+    const question = gameState.questions[gameState.currentQuestion];
+    gameState.practiceState.answerTimes.push(0); // スキップは0秒として記録
+    gameState.practiceState.currentStreak = 0;
+    
+    // 正解を表示
+    const choices = document.querySelectorAll('.choice');
+    choices.forEach(choice => {
+        choice.style.pointerEvents = 'none';
+        choice.classList.add('disabled');
+    });
+    choices[question.correct].classList.add('correct');
+    
+    if (gameState.practiceState.showExplanation && question.explanation) {
+        showExplanation(question.explanation, false);
+    }
+    
+    setTimeout(() => {
+        nextPracticeQuestion();
+    }, 2000);
+}
+
+function nextPracticeQuestion() {
+    gameState.currentQuestion++;
+    if (gameState.currentQuestion >= gameState.questions.length) {
+        showPracticeResults();
+    } else {
+        showPracticeQuestion();
+    }
+}
+
+function showPracticeResults() {
+    showScreen('resultScreen');
+    
+    // タイトルを変更
+    document.getElementById('resultTitle').textContent = '🎯 練習結果';
+    
+    // 通常の結果表示を非表示
+    document.getElementById('results').style.display = 'none';
+    
+    // 統計情報を表示
+    if (gameState.practiceState.showStatistics) {
+        showPracticeStatistics();
+    }
+    
+    // 復習セクションを表示
+    if (gameState.practiceState.reviewIncorrect && gameState.practiceState.incorrectAnswers.length > 0) {
+        showReviewSection();
+    }
+}
+
+function showPracticeStatistics() {
+    const practiceStats = document.getElementById('practiceStats');
+    practiceStats.style.display = 'block';
+    
+    const totalQuestions = gameState.questions.length;
+    const correctAnswers = totalQuestions - gameState.practiceState.incorrectAnswers.length;
+    const correctRate = Math.round((correctAnswers / totalQuestions) * 100);
+    
+    const totalTime = gameState.practiceState.answerTimes.reduce((sum, time) => sum + time, 0);
+    const averageTime = Math.round(totalTime / totalQuestions * 10) / 10;
+    
+    document.getElementById('correctRate').textContent = `${correctRate}%`;
+    document.getElementById('averageTime').textContent = `${averageTime}秒`;
+    document.getElementById('totalScore').textContent = `${gameState.scores.practice}点`;
+    document.getElementById('maxStreak').textContent = `${gameState.practiceState.maxStreak}問`;
+}
+
+function showReviewSection() {
+    const reviewSection = document.getElementById('reviewSection');
+    const reviewQuestions = document.getElementById('reviewQuestions');
+    
+    reviewSection.style.display = 'block';
+    
+    reviewQuestions.innerHTML = gameState.practiceState.incorrectAnswers.map((item, index) => {
+        const userAnswerText = item.userAnswer === -1 ? '時間切れ' : 
+                              item.question.choices[item.userAnswer];
+        
+        return `
+            <div class="review-question">
+                <div class="review-question-text">
+                    <strong>Q${index + 1}:</strong> ${item.question.question}
+                </div>
+                <div class="review-choices">
+                    ${item.question.choices.map((choice, i) => `
+                        <div class="review-choice ${
+                            i === item.correctAnswer ? 'correct' : 
+                            i === item.userAnswer ? 'incorrect' : 'neutral'
+                        }">
+                            ${choice} ${i === item.correctAnswer ? '✓' : ''}
+                            ${i === item.userAnswer && i !== item.correctAnswer ? '✗' : ''}
+                        </div>
+                    `).join('')}
+                </div>
+                <div style="margin-top: 1rem; font-size: 0.9rem; color: var(--text-secondary);">
+                    あなたの回答: ${userAnswerText} | 正解: ${item.question.choices[item.correctAnswer]}
+                </div>
+                ${item.question.explanation ? `
+                    <div style="margin-top: 1rem; padding: 1rem; background: var(--bg-tertiary); border-radius: var(--border-radius); font-size: 0.9rem;">
+                        💡 ${item.question.explanation}
+                    </div>
+                ` : ''}
+            </div>
+        `;
+    }).join('');
+}
+
+function startReviewMode() {
+    if (gameState.practiceState.incorrectAnswers.length === 0) {
+        alert('復習する問題がありません');
+        return;
+    }
+    
+    // 間違えた問題のみで新しいゲームを開始
+    gameState.questions = gameState.practiceState.incorrectAnswers.map(item => item.question);
+    gameState.currentQuestion = 0;
+    gameState.practiceState.startTime = Date.now();
+    gameState.practiceState.incorrectAnswers = [];
+    gameState.practiceState.answerTimes = [];
+    gameState.practiceState.currentStreak = 0;
+    gameState.practiceState.maxStreak = 0;
+    gameState.scores = { practice: 0 };
+    
+    showPracticeQuestion();
+}
 
 // WebSocket接続管理
 function initWebSocket() {
@@ -1338,7 +2091,6 @@ function initWebSocket() {
         gameState.onlineState.ws.onclose = () => {
             console.log('WebSocket接続切断');
             updateConnectionStatus(false);
-            // 再接続を試行
             setTimeout(() => {
                 if (!gameState.onlineState.connected) {
                     initWebSocket();
@@ -1434,7 +2186,6 @@ function handleWebSocketMessage(data) {
             break;
             
         case 'nextQuestion':
-            // 次の問題への準備
             setTimeout(() => {
                 console.log('次の問題を待機中...');
             }, 1000);
@@ -1464,7 +2215,6 @@ function showCountdown(count, questionNumber, totalQuestions) {
     
     if (countdownNumber) {
         countdownNumber.textContent = count;
-        // アニメーションをリセットして再適用
         countdownNumber.style.animation = 'none';
         setTimeout(() => {
             countdownNumber.style.animation = 'countdownPulse 1s ease-in-out';
@@ -1489,7 +2239,6 @@ function updateConnectionStatus(connected) {
 
 // 画面管理
 function showScreen(screenId) {
-    // オンライン時以外はタイマーを停止
     if (screenId !== 'quizScreen' || gameState.mode === 'local') {
         stopTimer();
     }
@@ -1508,6 +2257,7 @@ function showHome() {
     gameState.scores = {};
     gameState.currentQuestion = 0;
     gameState.selectedCategories = [];
+    gameState.practiceState.selectedCategories = [];
     stopTimer();
     showScreen('homeScreen');
     if (gameState.onlineState.ws) {
@@ -1531,6 +2281,7 @@ function showQuestionCreator() {
     showScreen('questionCreatorScreen');
     updateQuestionList();
 }
+
 // プレイヤー管理
 function addPlayer() {
     const input = document.getElementById('playerName');
@@ -1605,7 +2356,7 @@ function showPlayerRegistration() {
 }
 
 function toggleCategory(categoryKey) {
-    const categoryItem = document.querySelector(`[data-category="${categoryKey}"]`);
+    const categoryItem = document.querySelector(`#categorySelection [data-category="${categoryKey}"]`);
     if (!categoryItem) return;
     
     const index = gameState.selectedCategories.indexOf(categoryKey);
@@ -1674,7 +2425,7 @@ function shuffleArray(array) {
 // 問題表示・管理
 function showQuestion() {
     if (gameState.mode === 'local') {
-        stopTimer(); // ローカルモード時のみタイマーを停止
+        stopTimer();
     }
     
     if (gameState.currentQuestion >= gameState.questions.length) {
@@ -1688,6 +2439,12 @@ function showQuestion() {
     
     showScreen('quizScreen');
     
+    // UI要素を通常モードに戻す
+    document.getElementById('gameModeInfo').textContent = '⚡ 正解者全員にポイント！早押しで高得点を狙え！';
+    document.getElementById('practiceControls').style.display = 'none';
+    document.getElementById('answerLog').style.display = 'block';
+    document.getElementById('explanationArea').style.display = 'none';
+    
     document.getElementById('questionText').textContent = question.question;
     document.getElementById('questionNumber').textContent = `第${gameState.currentQuestion + 1}問 / ${gameState.questions.length}問`;
     
@@ -1698,7 +2455,6 @@ function showQuestion() {
     
     document.getElementById('answerList').innerHTML = '';
     
-    // ローカル時のみタイマー開始
     if (gameState.mode === 'local') {
         setTimeout(() => {
             startTimer();
@@ -1706,10 +2462,10 @@ function showQuestion() {
     }
 }
 
-// タイマー管理（ローカル専用）
+// タイマー管理
 function startTimer() {
     if (gameState.mode === 'online') {
-        return; // オンライン時はタイマー制御しない
+        return;
     }
     
     if (gameState.timer) {
@@ -1730,7 +2486,9 @@ function startTimer() {
         if (gameState.timeLeft <= 0) {
             clearInterval(gameState.timer);
             gameState.timer = null;
-            handleTimeUp();
+            if (gameState.mode === 'local') {
+                handleTimeUp();
+            }
         }
     }, 1000);
 }
@@ -1738,13 +2496,13 @@ function startTimer() {
 function updateTimerDisplay() {
     const timerElement = document.getElementById('timer');
     if (timerElement) {
-        timerElement.textContent = gameState.timeLeft;
+        timerElement.textContent = gameState.timeLeft === -1 ? '∞' : gameState.timeLeft;
     }
 }
 
 function handleTimeUp() {
-    if (gameState.mode === 'online') {
-        return; // オンライン時は時間切れ処理しない
+    if (gameState.mode === 'online' || gameState.mode === 'practice') {
+        return;
     }
     
     const choices = document.querySelectorAll('.choice');
@@ -1772,8 +2530,10 @@ function stopTimer() {
 function selectChoice(index) {
     if (gameState.mode === 'local') {
         selectChoiceLocal(index);
-    } else {
+    } else if (gameState.mode === 'online') {
         selectChoiceOnline(index);
+    } else if (gameState.mode === 'practice') {
+        selectPracticeChoice(index);
     }
 }
 
@@ -1862,7 +2622,7 @@ function showPlayerSelectionDialog(choiceIndex) {
             width: 90%;
             box-shadow: var(--shadow-heavy);
         ">
-            <h3 style="color: #667eea; margin-bottom: 1.5rem; font-family: 'Poppins', sans-serif;">
+            <h3 style="color: var(--text-primary); margin-bottom: 1.5rem;">
                 👤 どのプレイヤーが回答しますか？
             </h3>
             <div style="margin-bottom: 1.5rem;">
@@ -1901,7 +2661,6 @@ function processAnswer(playerName, choiceIndex) {
     
     gameState.currentAnswers.push(answerData);
     
-    // ポイント計算（正解者のみ）
     if (isCorrect) {
         const points = getPointsByOrder(answerData.order);
         const player = gameState.players.find(p => p.name === playerName);
@@ -1910,7 +2669,6 @@ function processAnswer(playerName, choiceIndex) {
         }
     }
     
-    // 選択肢の色を更新
     const choices = document.querySelectorAll('.choice');
     if (isCorrect) {
         choices[choiceIndex].classList.add('correct');
@@ -1921,7 +2679,6 @@ function processAnswer(playerName, choiceIndex) {
     
     updateAnswerLog();
     
-    // 全員が回答したか、または時間切れの場合は次の問題へ
     if (gameState.currentAnswers.length >= gameState.players.length) {
         stopTimer();
         setTimeout(() => {
@@ -1970,21 +2727,29 @@ function showResults() {
     stopTimer();
     showScreen('resultScreen');
     
-    if (gameState.mode === 'local') {
-        const sortedPlayers = gameState.players.sort((a, b) => 
-            gameState.scores[b.id] - gameState.scores[a.id]
-        );
+    // 練習モード以外の場合の結果表示
+    if (gameState.mode !== 'practice') {
+        document.getElementById('resultTitle').textContent = '🏆 最終結果';
+        document.getElementById('results').style.display = 'block';
+        document.getElementById('practiceStats').style.display = 'none';
+        document.getElementById('reviewSection').style.display = 'none';
         
-        const resultsDiv = document.getElementById('results');
-        resultsDiv.innerHTML = sortedPlayers.map((player, index) => `
-            <div class="rank-item rank-${Math.min(index + 1, 3)}">
-                <div>
-                    <span class="rank-number">${index + 1}</span>
-                    <span>👤 ${player.name}</span>
+        if (gameState.mode === 'local') {
+            const sortedPlayers = gameState.players.sort((a, b) => 
+                gameState.scores[b.id] - gameState.scores[a.id]
+            );
+            
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = sortedPlayers.map((player, index) => `
+                <div class="rank-item rank-${Math.min(index + 1, 3)}">
+                    <div>
+                        <span class="rank-number">${index + 1}</span>
+                        <span>👤 ${player.name}</span>
+                    </div>
+                    <div>🏆 ${gameState.scores[player.id]}ポイント</div>
                 </div>
-                <div>🏆 ${gameState.scores[player.id]}ポイント</div>
-            </div>
-        `).join('');
+            `).join('');
+        }
     }
 }
 
@@ -1993,9 +2758,15 @@ function resetGame() {
     gameState.scores = {};
     gameState.currentQuestion = 0;
     gameState.selectedCategories = [];
+    gameState.practiceState.selectedCategories = [];
     gameState.hasAnswered = false;
     stopTimer();
-    showScreen('playerScreen');
+    
+    if (gameState.mode === 'practice') {
+        showScreen('practiceModeScreen');
+    } else {
+        showScreen('playerScreen');
+    }
 }
 
 // 問題作成機能
@@ -2006,9 +2777,10 @@ function addQuestion() {
     const choice2 = document.getElementById('choice2').value.trim();
     const choice3 = document.getElementById('choice3').value.trim();
     const correctAnswer = parseInt(document.getElementById('correctAnswer').value) - 1;
+    const explanation = document.getElementById('questionExplanation').value.trim();
     
     if (!questionText || !choice1 || !choice2 || !choice3) {
-        alert('すべての項目を入力してください');
+        alert('問題文と選択肢はすべて入力してください');
         return;
     }
     
@@ -2021,7 +2793,8 @@ function addQuestion() {
         question: questionText,
         choices: [choice1, choice2, choice3],
         correct: correctAnswer,
-        category: category
+        category: category,
+        explanation: explanation || null
     };
     
     const saved = localStorage.getItem('customQuestions');
@@ -2035,6 +2808,7 @@ function addQuestion() {
     document.getElementById('choice2').value = '';
     document.getElementById('choice3').value = '';
     document.getElementById('correctAnswer').value = '';
+    document.getElementById('questionExplanation').value = '';
     
     updateQuestionList();
     alert('✅ 問題を追加しました！');
@@ -2053,6 +2827,7 @@ function updateQuestionList() {
             <small>📁 カテゴリ: ${getCategoryName(question.category)}</small><br>
             <small>📝 選択肢: ${question.choices.join(', ')}</small><br>
             <small>✅ 正解: ${question.choices[question.correct]}</small>
+            ${question.explanation ? `<br><small>💡 解説: ${question.explanation}</small>` : ''}
             <button class="btn btn-danger" onclick="removeQuestion(${index})" style="margin-top: 1rem;">
                 🗑️ 削除
             </button>
@@ -2082,6 +2857,7 @@ function removeQuestion(index) {
         updateQuestionList();
     }
 }
+
 // オンライン機能
 function createRoom() {
     const playerName = document.getElementById('onlinePlayerName').value.trim();
@@ -2158,7 +2934,6 @@ function startOnlineGame() {
         return;
     }
     
-    // カテゴリ選択ダイアログを表示
     showCategorySelectionDialog();
 }
 
@@ -2194,19 +2969,17 @@ function showCategorySelectionDialog() {
                  style="
                     padding: 1rem 1.5rem;
                     margin: 0.5rem;
-                    border: 3px solid #667eea;
+                    border: 2px solid var(--border-medium);
                     border-radius: var(--border-radius);
-                    background: rgba(255, 255, 255, 0.9);
-                    color: var(--text-dark);
+                    background: var(--bg-secondary);
+                    color: var(--text-primary);
                     cursor: pointer;
-                    font-weight: 600;
+                    font-weight: 500;
                     font-size: 1rem;
                     transition: var(--transition);
                     position: relative;
                     min-width: 140px;
                     text-align: center;
-                    backdrop-filter: blur(10px);
-                    box-shadow: var(--shadow-light);
                  ">${cat.name}</button>`
     ).join('');
     
@@ -2214,7 +2987,7 @@ function showCategorySelectionDialog() {
         <div style="
             background: var(--bg-card);
             backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid var(--border-light);
             border-radius: var(--border-radius-lg);
             padding: 2rem;
             text-align: center;
@@ -2222,7 +2995,7 @@ function showCategorySelectionDialog() {
             width: 90%;
             box-shadow: var(--shadow-heavy);
         ">
-            <h3 style="color: #667eea; margin-bottom: 1.5rem; font-family: 'Poppins', sans-serif; font-size: 1.5rem;">
+            <h3 style="color: var(--text-primary); margin-bottom: 1.5rem; font-size: 1.5rem;">
                 📚 問題カテゴリを選択
             </h3>
             <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 2rem;">
@@ -2241,12 +3014,10 @@ function showCategorySelectionDialog() {
     
     document.body.appendChild(dialog);
     
-    // 各カテゴリーボタンに個別にイベントリスナーを追加
     categories.forEach(cat => {
         const button = document.getElementById(`category-${cat.key}`);
         if (button) {
             button.addEventListener('click', function() {
-                console.log(`${cat.key}ボタンがクリックされました`);
                 toggleDialogCategoryById(cat.key);
             });
         }
@@ -2257,7 +3028,6 @@ function showCategorySelectionDialog() {
     document.getElementById('startGameBtn').addEventListener('click', startGameWithSelectedCategories);
     document.getElementById('cancelBtn').addEventListener('click', closeCategoryDialog);
     
-    // デフォルトで全カテゴリを選択
     setTimeout(() => {
         selectAllCategories();
     }, 100);
@@ -2265,15 +3035,9 @@ function showCategorySelectionDialog() {
 
 let selectedOnlineCategories = [];
 
-// ID指定での個別カテゴリー切り替え関数
 function toggleDialogCategoryById(category) {
-    console.log('ID指定でカテゴリー切り替え:', category);
-    
     const button = document.getElementById(`category-${category}`);
-    if (!button) {
-        console.error('ボタンが見つかりません（ID指定）:', `category-${category}`);
-        return;
-    }
+    if (!button) return;
     
     const index = selectedOnlineCategories.indexOf(category);
     
@@ -2287,68 +3051,21 @@ function toggleDialogCategoryById(category) {
     };
     
     if (index === -1) {
-        // 選択状態にする
         selectedOnlineCategories.push(category);
-        
-        console.log(`${category}を選択状態に変更`);
-        
-        // 選択時のスタイル
-        button.style.cssText = `
-            padding: 1rem 1.5rem;
-            margin: 0.5rem;
-            border: 3px solid #667eea;
-            border-radius: var(--border-radius);
-            background: var(--primary-gradient);
-            color: var(--text-primary);
-            cursor: pointer;
-            font-weight: 700;
-            font-size: 1rem;
-            transition: var(--transition);
-            position: relative;
-            min-width: 140px;
-            text-align: center;
-            backdrop-filter: blur(10px);
-            box-shadow: var(--shadow-medium);
-            transform: scale(1.05);
-        `;
-        
+        button.style.background = 'var(--accent-primary)';
+        button.style.color = 'var(--text-light)';
+        button.style.borderColor = 'var(--accent-primary)';
         button.innerHTML = `✓ ${categories[category]}`;
-        
-        console.log('選択完了:', category, selectedOnlineCategories);
     } else {
-        // 選択解除
         selectedOnlineCategories.splice(index, 1);
-        
-        console.log(`${category}を非選択状態に変更`);
-        
-        // 非選択時のスタイル
-        button.style.cssText = `
-            padding: 1rem 1.5rem;
-            margin: 0.5rem;
-            border: 3px solid #667eea;
-            border-radius: var(--border-radius);
-            background: rgba(255, 255, 255, 0.9);
-            color: var(--text-dark);
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 1rem;
-            transition: var(--transition);
-            position: relative;
-            min-width: 140px;
-            text-align: center;
-            backdrop-filter: blur(10px);
-            box-shadow: var(--shadow-light);
-            transform: scale(1);
-        `;
-        
+        button.style.background = 'var(--bg-secondary)';
+        button.style.color = 'var(--text-primary)';
+        button.style.borderColor = 'var(--border-medium)';
         button.innerHTML = categories[category];
-        
-        console.log('解除完了:', category, selectedOnlineCategories);
     }
 }
 
 function selectAllCategories() {
-    console.log('全て選択');
     selectedOnlineCategories = ['general', 'geography', 'history', 'science', 'sports', 'entertainment'];
     
     const categories = {
@@ -2363,32 +3080,15 @@ function selectAllCategories() {
     selectedOnlineCategories.forEach(category => {
         const button = document.getElementById(`category-${category}`);
         if (button) {
-            button.style.cssText = `
-                padding: 1rem 1.5rem;
-                margin: 0.5rem;
-                border: 3px solid #667eea;
-                border-radius: var(--border-radius);
-                background: var(--primary-gradient);
-                color: var(--text-primary);
-                cursor: pointer;
-                font-weight: 700;
-                font-size: 1rem;
-                transition: var(--transition);
-                position: relative;
-                min-width: 140px;
-                text-align: center;
-                backdrop-filter: blur(10px);
-                box-shadow: var(--shadow-medium);
-                transform: scale(1.05);
-            `;
+            button.style.background = 'var(--accent-primary)';
+            button.style.color = 'var(--text-light)';
+            button.style.borderColor = 'var(--accent-primary)';
             button.innerHTML = `✓ ${categories[category]}`;
         }
     });
 }
 
 function clearAllCategories() {
-    console.log('全て解除');
-    
     const categories = {
         'general': '📚 一般常識',
         'geography': '🌏 地理',
@@ -2404,24 +3104,9 @@ function clearAllCategories() {
     currentSelected.forEach(category => {
         const button = document.getElementById(`category-${category}`);
         if (button) {
-            button.style.cssText = `
-                padding: 1rem 1.5rem;
-                margin: 0.5rem;
-                border: 3px solid #667eea;
-                border-radius: var(--border-radius);
-                background: rgba(255, 255, 255, 0.9);
-                color: var(--text-dark);
-                cursor: pointer;
-                font-weight: 600;
-                font-size: 1rem;
-                transition: var(--transition);
-                position: relative;
-                min-width: 140px;
-                text-align: center;
-                backdrop-filter: blur(10px);
-                box-shadow: var(--shadow-light);
-                transform: scale(1);
-            `;
+            button.style.background = 'var(--bg-secondary)';
+            button.style.color = 'var(--text-primary)';
+            button.style.borderColor = 'var(--border-medium)';
             button.innerHTML = categories[category];
         }
     });
@@ -2435,7 +3120,6 @@ function startGameWithSelectedCategories() {
     
     closeCategoryDialog();
     
-    // カスタム問題も含めて送信
     const saved = localStorage.getItem('customQuestions');
     const customQuestions = saved ? JSON.parse(saved) : [];
     
@@ -2486,24 +3170,18 @@ function startOnlineQuiz(questions) {
 }
 
 function showOnlineQuestion(data) {
-    console.log('オンライン問題表示:', data);
-    
-    // 現在の問題番号を正確に設定
     gameState.currentQuestion = data.questionNumber - 1;
     gameState.currentAnswers = [];
     gameState.hasAnswered = false;
     
-    // サーバーから送られた時間を設定
     if (data.timeLeft !== undefined) {
         gameState.timeLeft = data.timeLeft;
     } else {
         gameState.timeLeft = 15;
     }
     
-    // 必ずクイズ画面を表示
     showScreen('quizScreen');
     
-    // 問題データを保存
     if (!gameState.questions[gameState.currentQuestion]) {
         gameState.questions[gameState.currentQuestion] = data.question;
     }
@@ -2516,27 +3194,20 @@ function showOnlineQuestion(data) {
         <div class="choice" onclick="selectChoice(${index})">${choice}</div>
     `).join('');
     
-    // 回答ログをクリア
     const answerList = document.getElementById('answerList');
     if (answerList) {
         answerList.innerHTML = '<h4>📊 回答状況</h4>';
     }
     
-    // タイマー表示を初期化
     updateTimerDisplay();
-    
-    console.log(`問題${data.questionNumber}を表示しました`);
 }
 
-// オンライン用タイマー更新
 function updateOnlineTimer(timeLeft) {
     gameState.timeLeft = timeLeft;
     updateTimerDisplay();
 }
 
 function handleOnlineAnswerReceived(data) {
-    console.log('回答受信:', data);
-    
     const answerData = {
         playerId: data.playerId,
         playerName: data.playerName,
@@ -2547,12 +3218,10 @@ function handleOnlineAnswerReceived(data) {
     
     gameState.currentAnswers.push(answerData);
     
-    // 回答ログを更新
     const answerList = document.getElementById('answerList');
     if (answerList) {
         const isYou = data.playerId === gameState.onlineState.playerId;
         
-        // 既存の内容に追加
         let currentHTML = answerList.innerHTML;
         if (!currentHTML.includes('<h4>📊 回答状況</h4>')) {
             currentHTML = '<h4>📊 回答状況</h4>';
@@ -2575,30 +3244,24 @@ function handleOnlineAnswerReceived(data) {
 }
 
 function handleOnlineQuestionEnd(data) {
-    console.log('問題終了:', data);
-    
     const question = data.question;
     const choices = document.querySelectorAll('.choice');
     
-    // すべての選択肢を無効化
     choices.forEach(choice => {
         choice.style.pointerEvents = 'none';
         choice.classList.add('disabled');
     });
     
-    // 正解を表示
     if (choices[question.correct]) {
         choices[question.correct].classList.add('correct');
     }
     
-    // 各プレイヤーの回答結果を表示
     data.results.forEach(result => {
         if (result.answer !== question.correct && result.answer >= 0 && choices[result.answer]) {
             choices[result.answer].classList.add('incorrect');
         }
     });
     
-    // 回答ログを更新
     const answerList = document.getElementById('answerList');
     if (answerList) {
         const correctAnswers = data.results.filter(r => r.correct).sort((a, b) => b.timeLeft - a.timeLeft);
@@ -2625,8 +3288,6 @@ function handleOnlineQuestionEnd(data) {
         
         answerList.innerHTML = logHTML;
     }
-    
-    console.log(`問題${gameState.currentQuestion + 1}の結果を表示しました`);
 }
 
 function showOnlineResults(finalScores) {
@@ -2665,32 +3326,109 @@ function leaveOnlineRoom() {
     showScreen('onlineMenuScreen');
 }
 
-// 次の問題へのカウントダウン表示関数を追加
 function showNextQuestionCountdown(count, nextQuestionNumber, totalQuestions) {
     const countdownDiv = document.getElementById('countdown');
     const countdownNumber = document.getElementById('countdown-number');
     const countdownText = document.getElementById('countdown-text');
     
-    countdownNumber.textContent = count;
-    countdownText.textContent = `次の問題 (第${nextQuestionNumber}問/${totalQuestions}問) まで`;
-    
-    countdownDiv.style.display = 'block';
-    
-    // アニメーション効果
-    countdownNumber.style.transform = 'scale(1.2)';
-    setTimeout(() => {
-        countdownNumber.style.transform = 'scale(1)';
-    }, 200);
-    
-    if (count <= 0) {
-        countdownDiv.style.display = 'none';
+    if (countdownNumber) {
+        countdownNumber.textContent = count;
+        countdownText.textContent = `次の問題 (第${nextQuestionNumber}問/${totalQuestions}問) まで`;
+        
+        countdownDiv.style.display = 'block';
+        
+        countdownNumber.style.transform = 'scale(1.2)';
+        setTimeout(() => {
+            countdownNumber.style.transform = 'scale(1)';
+        }, 200);
+        
+        if (count <= 0) {
+            countdownDiv.style.display = 'none';
+        }
     }
 }
 
 // 初期化
 function init() {
     console.log('🎯 Quiz Battle Premium 初期化完了');
+    
+    // 練習モードの設定をローカルストレージから復元
+    const savedPracticeSettings = localStorage.getItem('practiceSettings');
+    if (savedPracticeSettings) {
+        try {
+            const settings = JSON.parse(savedPracticeSettings);
+            if (settings.timeLimit) document.getElementById('practiceTimeLimit').value = settings.timeLimit;
+            if (settings.questionCount) document.getElementById('practiceQuestionCount').value = settings.questionCount;
+            if (settings.questionOrder) document.getElementById('practiceQuestionOrder').value = settings.questionOrder;
+            if (settings.showExplanation !== undefined) document.getElementById('showAnswerExplanation').checked = settings.showExplanation;
+            if (settings.showStatistics !== undefined) document.getElementById('showStatistics').checked = settings.showStatistics;
+            if (settings.reviewIncorrect !== undefined) document.getElementById('reviewIncorrect').checked = settings.reviewIncorrect;
+        } catch (error) {
+            console.log('練習設定の復元に失敗:', error);
+        }
+    }
+    
+    // 設定変更時の自動保存
+    const practiceSettings = ['practiceTimeLimit', 'practiceQuestionCount', 'practiceQuestionOrder', 'showAnswerExplanation', 'showStatistics', 'reviewIncorrect'];
+    practiceSettings.forEach(settingId => {
+        const element = document.getElementById(settingId);
+        if (element) {
+            element.addEventListener('change', savePracticeSettings);
+        }
+    });
 }
+
+// 練習設定の保存
+function savePracticeSettings() {
+    const settings = {
+        timeLimit: document.getElementById('practiceTimeLimit').value,
+        questionCount: document.getElementById('practiceQuestionCount').value,
+        questionOrder: document.getElementById('practiceQuestionOrder').value,
+        showExplanation: document.getElementById('showAnswerExplanation').checked,
+        showStatistics: document.getElementById('showStatistics').checked,
+        reviewIncorrect: document.getElementById('reviewIncorrect').checked
+    };
+    
+    localStorage.setItem('practiceSettings', JSON.stringify(settings));
+}
+
+// キーボードショートカット
+document.addEventListener('keydown', function(event) {
+    // 練習モード中のキーボードショートカット
+    if (gameState.mode === 'practice' && document.getElementById('quizScreen').classList.contains('active')) {
+        // 数字キー1-3で選択肢を選択
+        if (event.key >= '1' && event.key <= '3' && !gameState.hasAnswered) {
+            const choiceIndex = parseInt(event.key) - 1;
+            selectPracticeChoice(choiceIndex);
+        }
+        // スペースキーでスキップ
+        else if (event.key === ' ' && !gameState.hasAnswered) {
+            event.preventDefault();
+            skipQuestion();
+        }
+        // Enterキーで次の問題（回答後）
+        else if (event.key === 'Enter' && gameState.hasAnswered) {
+            nextPracticeQuestion();
+        }
+    }
+    
+    // 全モード共通のショートカット
+    // Escapeキーでホームに戻る
+    if (event.key === 'Escape') {
+        if (confirm('ホーム画面に戻りますか？進行中のゲームは失われます。')) {
+            showHome();
+        }
+    }
+});
+
+// ページを離れる前の確認（ゲーム中のみ）
+window.addEventListener('beforeunload', function(event) {
+    if (gameState.mode !== 'local' && gameState.currentQuestion > 0 && gameState.currentQuestion < gameState.questions.length) {
+        event.preventDefault();
+        event.returnValue = 'ゲームが進行中です。ページを離れますか？';
+        return event.returnValue;
+    }
+});
 
 // ページ読み込み完了時に初期化
 document.addEventListener('DOMContentLoaded', init);
@@ -2705,6 +3443,206 @@ if (typeof performance !== 'undefined' && performance.mark) {
     });
 }
 
+// サービスワーカー登録（PWA対応）
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+            .then((registration) => {
+                console.log('ServiceWorker registered: ', registration.scope);
+            })
+            .catch((registrationError) => {
+                console.log('ServiceWorker registration failed: ', registrationError);
+            });
+    });
+}
+
+// オフライン対応
+window.addEventListener('online', () => {
+    console.log('オンラインに戻りました');
+    if (gameState.mode === 'online' && !gameState.onlineState.connected) {
+        initWebSocket();
+    }
+});
+
+window.addEventListener('offline', () => {
+    console.log('オフラインになりました');
+    updateConnectionStatus(false);
+});
+
+// タッチデバイス対応
+let touchStartY = 0;
+let touchEndY = 0;
+
+document.addEventListener('touchstart', function(event) {
+    touchStartY = event.changedTouches[0].screenY;
+}, false);
+
+document.addEventListener('touchend', function(event) {
+    touchEndY = event.changedTouches[0].screenY;
+    handleSwipe();
+}, false);
+
+function handleSwipe() {
+    const swipeThreshold = 100;
+    const swipeDistance = touchStartY - touchEndY;
+    
+    // 上スワイプでスキップ（練習モード中のみ）
+    if (gameState.mode === 'practice' && 
+        document.getElementById('quizScreen').classList.contains('active') && 
+        swipeDistance > swipeThreshold && 
+        !gameState.hasAnswered) {
+        skipQuestion();
+    }
+}
+
+// ダークモード切り替え機能
+function toggleDarkMode() {
+    document.body.classList.toggle('dark-mode');
+    const isDarkMode = document.body.classList.contains('dark-mode');
+    localStorage.setItem('darkMode', isDarkMode);
+}
+
+// ダークモード設定の復元
+function loadDarkModePreference() {
+    const savedDarkMode = localStorage.getItem('darkMode');
+    if (savedDarkMode === 'true') {
+        document.body.classList.add('dark-mode');
+    }
+}
+
+// 音声効果（オプション）
+const sounds = {
+    correct: () => {
+        if (typeof AudioContext !== 'undefined') {
+            const audioContext = new AudioContext();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime); // C5
+            oscillator.frequency.setValueAtTime(659.25, audioContext.currentTime + 0.1); // E5
+            oscillator.frequency.setValueAtTime(783.99, audioContext.currentTime + 0.2); // G5
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.3);
+        }
+    },
+    
+    incorrect: () => {
+        if (typeof AudioContext !== 'undefined') {
+            const audioContext = new AudioContext();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.setValueAtTime(220, audioContext.currentTime); // A3
+            oscillator.frequency.setValueAtTime(196, audioContext.currentTime + 0.15); // G3
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.3);
+        }
+    }
+};
+
+// 音声効果の再生（設定で有効な場合のみ）
+function playSound(soundType) {
+    const soundEnabled = localStorage.getItem('soundEnabled') !== 'false';
+    if (soundEnabled && sounds[soundType]) {
+        sounds[soundType]();
+    }
+}
+
+// 統計データの保存と読み込み
+function savePracticeStatistics(stats) {
+    const allStats = JSON.parse(localStorage.getItem('practiceStatistics') || '[]');
+    allStats.push({
+        ...stats,
+        date: new Date().toISOString(),
+        categories: [...gameState.practiceState.selectedCategories]
+    });
+    
+    // 最新100件のみ保持
+    if (allStats.length > 100) {
+        allStats.splice(0, allStats.length - 100);
+    }
+    
+    localStorage.setItem('practiceStatistics', JSON.stringify(allStats));
+}
+
+function getPracticeStatistics() {
+    return JSON.parse(localStorage.getItem('practiceStatistics') || '[]');
+}
+
+// エクスポート・インポート機能
+function exportCustomQuestions() {
+    const saved = localStorage.getItem('customQuestions');
+    const questions = saved ? JSON.parse(saved) : [];
+    
+    const dataStr = JSON.stringify(questions, null, 2);
+    const dataBlob = new Blob([dataStr], {type: 'application/json'});
+    
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(dataBlob);
+    link.download = 'custom_questions.json';
+    link.click();
+}
+
+function importCustomQuestions(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const questions = JSON.parse(e.target.result);
+            if (Array.isArray(questions)) {
+                localStorage.setItem('customQuestions', JSON.stringify(questions));
+                updateQuestionList();
+                alert(`${questions.length}問をインポートしました！`);
+            } else {
+                alert('無効なファイル形式です');
+            }
+        } catch (error) {
+            alert('ファイルの読み込みに失敗しました');
+        }
+    };
+    reader.readAsText(file);
+}
+
+// デバッグ用コンソールコマンド
+if (typeof window !== 'undefined') {
+    window.QuizDebug = {
+        setScore: (score) => {
+            if (gameState.mode === 'practice') {
+                gameState.scores.practice = score;
+                console.log(`スコアを${score}に設定しました`);
+            }
+        },
+        skipToResults: () => {
+            if (gameState.mode === 'practice') {
+                showPracticeResults();
+                console.log('結果画面にスキップしました');
+            }
+        },
+        clearStats: () => {
+            localStorage.removeItem('practiceStatistics');
+            console.log('統計データをクリアしました');
+        },
+        getGameState: () => {
+            return gameState;
+        }
+    };
+}
     </script>
 </body>
 </html>
