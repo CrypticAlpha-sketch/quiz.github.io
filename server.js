@@ -1075,76 +1075,103 @@ function handleSelectAnswer(ws, data) {
 
 // 問題終了処理
 function endQuestion(room) {
-   console.log(`問題${room.currentQuestion + 1}終了 - ルーム${room.id}`);
-   
-   // タイマーをクリア
-   if (room.countdownTimer) {
-       clearInterval(room.countdownTimer);
-       room.countdownTimer = null;
-   }
-   if (room.questionTimer) {
-       clearTimeout(room.questionTimer);
-       room.questionTimer = null;
-   }
-   
-   const question = room.questions[room.currentQuestion];
-   
-   // 結果をポイント付きで送信
-   const results = room.answers.map(answer => {
-       let points = 0;
-       if (answer.correct) {
-           const correctOrder = room.answers
-               .filter(a => a.correct && a.timestamp <= answer.timestamp)
-               .length;
-           switch (correctOrder) {
-               case 1: points = 100; break;
-               case 2: points = 80; break;
-               case 3: points = 60; break;
-               default: points = 40; break;
-           }
-       }
-       
-       return {
-           playerId: answer.playerId,
-           playerName: answer.playerName,
-           answer: answer.answerIndex,
-           correct: answer.correct,
-           timeLeft: answer.timeLeft,
-           points: points
-       };
-   });
-   
-   broadcastToRoom(room.id, {
-       type: 'questionEnd',
-       question: question,
-       results: results
-   });
-   
-   // 3秒後に次の問題へ
-   setTimeout(() => {
-       nextQuestion(room);
-   }, 3000);
+    console.log(`問題${room.currentQuestion + 1}終了 - ルーム${room.id}`);
+    
+    // タイマーをクリア
+    if (room.countdownTimer) {
+        clearInterval(room.countdownTimer);
+        room.countdownTimer = null;
+    }
+    if (room.questionTimer) {
+        clearTimeout(room.questionTimer);
+        room.questionTimer = null;
+    }
+    
+    const question = room.questions[room.currentQuestion];
+    
+    // 結果をポイント付きで送信
+    const results = room.answers.map(answer => {
+        let points = 0;
+        if (answer.correct) {
+            const correctOrder = room.answers
+                .filter(a => a.correct && a.timestamp <= answer.timestamp)
+                .length;
+            switch (correctOrder) {
+                case 1: points = 100; break;
+                case 2: points = 80; break;
+                case 3: points = 60; break;
+                default: points = 40; break;
+            }
+        }
+        
+        return {
+            playerId: answer.playerId,
+            playerName: answer.playerName,
+            answer: answer.answerIndex,
+            correct: answer.correct,
+            timeLeft: answer.timeLeft,
+            points: points
+        };
+    });
+    
+    broadcastToRoom(room.id, {
+        type: 'questionEnd',
+        question: question,
+        results: results
+    });
+    
+    // 答えを表示しながら次の問題へのカウントダウンを開始
+    setTimeout(() => {
+        startNextQuestionCountdown(room);
+    }, 1000);
+}
+
+// 次の問題へのカウントダウン開始（回答表示中）
+function startNextQuestionCountdown(room) {
+    if (room.currentQuestion + 1 >= room.questions.length) {
+        // 最後の問題の場合はゲーム終了
+        setTimeout(() => {
+            endGame(room);
+        }, 3000);
+        return;
+    }
+    
+    console.log(`次の問題へのカウントダウン開始 - ルーム${room.id}`);
+    
+    let countdownTime = 5; // 5秒カウントダウン
+    
+    // カウントダウンを全員に送信（答え表示中）
+    const sendNextCountdown = () => {
+        if (countdownTime > 0) {
+            broadcastToRoom(room.id, {
+                type: 'nextQuestionCountdown',
+                count: countdownTime,
+                nextQuestionNumber: room.currentQuestion + 2, // 次の問題番号
+                totalQuestions: room.questions.length
+            });
+            
+            countdownTime--;
+            setTimeout(sendNextCountdown, 1000); // 1秒後に次のカウントダウン
+        } else {
+            // カウントダウン終了、次の問題へ
+            nextQuestion(room);
+        }
+    };
+    
+    sendNextCountdown();
 }
 
 // 次の問題
 function nextQuestion(room) {
-   room.currentQuestion++;
-   console.log(`次の問題へ: ${room.currentQuestion + 1}/${room.questions.length}`);
-   
-   if (room.currentQuestion >= room.questions.length) {
-       endGame(room);
-   } else {
-       // 次の問題通知
-       broadcastToRoom(room.id, {
-           type: 'nextQuestion',
-           questionNumber: room.currentQuestion + 1
-       });
-       
-       // カウントダウンを開始
-       setTimeout(() => {
-           startCountdown(room, room.currentQuestion + 1);
-       }, 1000);
-   }
+    room.currentQuestion++;
+    console.log(`次の問題へ: ${room.currentQuestion + 1}/${room.questions.length}`);
+    
+    if (room.currentQuestion >= room.questions.length) {
+        endGame(room);
+    } else {
+        // 問題開始前のカウントダウンを開始
+        startCountdown(room, room.currentQuestion + 1);
+    }
 }
 
 // ゲーム終了
